@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
-    "dev": "cross-env APP_ENV=dev nodemon ./src/test.js",
+    "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -19,6 +19,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
-    "joi": "^17.13.3"
+    "joi": "^17.13.3",
+    "mongoose": "^8.6.4"
   }
 }
