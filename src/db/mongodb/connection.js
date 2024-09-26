@@ -15,8 +15,8 @@ async function connect(){
     }
 
     catch(e){
-        //internalError_handler(new MongoDB_Connection_Error("",e));
-        return {error:true}
+        //Already handled by "EROR HANDLING" BELOW
+        return {error:true} //Just return error to let the caller know
     }
 }
 
