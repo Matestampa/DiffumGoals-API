@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
     "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -21,5 +21,12 @@
     "express-session": "^1.18.0",
     "joi": "^17.13.3",
     "mongoose": "^8.6.4"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }
