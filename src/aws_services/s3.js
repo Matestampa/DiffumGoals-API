@@ -1,9 +1,7 @@
 
-import {S3Client,PutObjectCommand} from "@aws-sdk/client-s3";
-
-import {AWS_S3_VARS} from "../config/s3_config.js";
-
-import {aws_errorHandler} from "./error_handler.js";
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { AWS_S3_VARS } = require("../config/s3_config.js");
+const { aws_errorHandler } = require("./error_handler.js");
 
 //----------------------- S3 class client & vars---------------------------
 
@@ -42,4 +40,4 @@ const S3_FUNCS={
     saveObject
 }
 
-export default S3_FUNCS;
+module.module.exportss = S3_FUNCS;

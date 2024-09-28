@@ -1,4 +1,4 @@
-import { get_env } from "./get_env.js";
+const { get_env } = require("./get_env.js");
 
 get_env();
 
@@ -8,4 +8,4 @@ const AWS_S3_VARS={
     bucketName:process.env.S3_BUCKET_NAME
 }
 
-export {AWS_S3_VARS}
+module.exports= {AWS_S3_VARS}

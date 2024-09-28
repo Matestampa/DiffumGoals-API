@@ -63,4 +63,4 @@ const DEFLT_API_ERRORS={
 }
 
 
-export {Error4User,DEFLT_API_ERRORS};
+module.exports= {Error4User,DEFLT_API_ERRORS};

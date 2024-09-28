@@ -1,4 +1,4 @@
-import {InternalError} from "../error_handling/index.js"
+const { InternalError } = require("../error_handling");
 
 
 //MUST be called with the direct error from AWS, and the service name which
@@ -47,7 +47,7 @@ class AwsService_Unknown_Error extends InternalError{
     }
 }
 
-export {aws_errorHandler,
+module.exports= {aws_errorHandler,
     AwsService_TimeOut_Error,
     AwsService_Unavailable_Error,
     AwsService_Unknown_Error

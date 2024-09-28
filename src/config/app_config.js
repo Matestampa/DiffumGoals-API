@@ -1,4 +1,4 @@
-import { get_env } from "./get_env.js";
+const { get_env } = require("./get_env.js");
 
 
 get_env();
@@ -10,4 +10,4 @@ const APP_CONN_VARS={
     port:process.env.PORT,
 }
 
-export {APP_CONN_VARS};
+module.exports= {APP_CONN_VARS};
