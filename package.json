@@ -5,7 +5,7 @@
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
     "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
-    "test": "jest"
+    "test": "cross-env APP_ENV=dev jest"
   },
   "author": "",
   "license": "ISC",
