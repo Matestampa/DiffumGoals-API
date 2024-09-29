@@ -6,7 +6,7 @@ const router = express.Router();
 const GoalsController = require("../controllers/goalsControllers.js");
 
 
-router.post("/upload",GoalsController.uploadGoal);
+router.post("/new",GoalsController.newGoal);
 
 router.get("/",GoalsController.getGoals);
 
