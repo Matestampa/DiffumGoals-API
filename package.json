@@ -19,7 +19,9 @@
     "express": "^4.21.0",
     "express-session": "^1.18.0",
     "joi": "^17.13.3",
-    "mongoose": "^8.6.4"
+    "mongoose": "^8.6.4",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5"
   },
   "jest": {
     "testEnvironment": "node"
