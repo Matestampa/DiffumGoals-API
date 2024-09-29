@@ -27,4 +27,4 @@ const GEN_INT_ERRORS={
   UNKNOWN:(message,attachedError)=>new UnknownError(message,attachedError)
 }
 
-export {InternalError,GEN_INT_ERRORS};
+module.exports= {InternalError,GEN_INT_ERRORS};

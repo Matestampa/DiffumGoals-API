@@ -1,4 +1,4 @@
-import {connect,disconnect} from "./connection.js";
+const { connect, disconnect } = require("./connection.js");
 
 
-export {connect,disconnect}
+module.exports= {connect,disconnect}

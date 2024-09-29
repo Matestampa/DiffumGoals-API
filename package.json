@@ -2,7 +2,6 @@
   "name": "api",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
     "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",

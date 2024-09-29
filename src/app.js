@@ -1,15 +1,13 @@
-import express from "express";
-const App=express();
+const express = require("express");
+const App = express();
 
-
-import cookieParser from "cookie-parser";
+const cookieParser = require("cookie-parser");
 //---------------------- IMPORT MIDLEWARES ---------------------
 
 
-
 //----------------------- IMPORT ROUTES ------------------------
+const goalsRoutes = require("./routes/goalsRoutes.js");
 
-import goalsRoutes  from "./routes/goalsRoutes.js";
 
 //-------------------- GENERAL EXPRESS CONFIG ---------------------
 
@@ -28,4 +26,4 @@ App.use("/serverUp",async (req,res)=>{
 App.use("/goals",goalsRoutes)
 
 
-export {App};
+module.exports= {App};

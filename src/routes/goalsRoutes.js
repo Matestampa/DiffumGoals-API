@@ -1,9 +1,9 @@
 
-import express from "express";
+const express = require("express");
 
-const router=express.Router();
+const router = express.Router();
 
-import GoalsController from "../controllers/goalsControllers.js";
+const GoalsController = require("../controllers/goalsControllers.js");
 
 
 router.post("/upload",GoalsController.uploadGoal);
@@ -13,4 +13,4 @@ router.get("/",GoalsController.getGoals);
 
 const goalsRouter=router;
 
-export default goalsRouter;
+module.exports=goalsRouter;

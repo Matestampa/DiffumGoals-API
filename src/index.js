@@ -1,7 +1,8 @@
-import { App } from "./app.js";
-import { APP_CONN_VARS } from "./config/app_config.js";
+const { App } = require("./app.js");
 
-import { connect } from "./db/mongodb/index.js";
+const { APP_CONN_VARS } = require("./config/app_config.js");
+
+const { connect } = require("./db/mongodb");
 
 const PORT=APP_CONN_VARS.port;
 

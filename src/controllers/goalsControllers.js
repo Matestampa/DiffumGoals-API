@@ -8,4 +8,4 @@ async function getGoals(){}
 
 const GoalsController={uploadGoal,getGoals}
 
-export default GoalsController;
+module.exports=GoalsController;

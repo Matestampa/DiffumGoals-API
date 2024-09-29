@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-import {MONGODB_VARS} from "../../config/mongodb.js";
+const { MONGODB_VARS } = require("../../config/mongodb.js");
 
-import {internalError_handler,InternalError} from "../../error_handling/index.js";
+const { internalError_handler, InternalError } = require("../../error_handling");
 
 //----- CONNECTION STRING/URL ----------
 const connectionString=MONGODB_VARS.url;
@@ -39,4 +39,4 @@ class MongoDB_Connection_Error extends InternalError{
 }
 
 
-export {connect,disconnect};
+module.exports= {connect,disconnect};
