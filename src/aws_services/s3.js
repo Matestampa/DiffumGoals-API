@@ -40,4 +40,4 @@ const S3_FUNCS={
     saveObject
 }
 
-module.module.exportss = S3_FUNCS;
+module.exports = S3_FUNCS;

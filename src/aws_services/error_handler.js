@@ -19,35 +19,41 @@ function aws_errorHandler(error,service){
 
 }
 
+//--------- GENERAL AWS ERROR --------------
+class AwsService_Error extends InternalError{
+    constructor(message,attachedError,service){
+        super(message,attachedError,service);
+        this.name="";
+        this.critic=true;
+        this.service=service;
+    }
+}
 
-class AwsService_TimeOut_Error extends InternalError{
+//------------ CHILD CLASSES --------------------
+
+class AwsService_TimeOut_Error extends AwsService_Error{
     constructor(message,attachedError,service){
         super(message,attachedError);
         this.name="AwsService_TimeOut_Error";
-        this.critic=true;
-        this.service=service;
     }
 }
 
-class AwsService_Unavailable_Error extends InternalError{
+class AwsService_Unavailable_Error extends AwsService_Error{
     constructor(message,attachedError,service){
         super(message,attachedError);
         this.name="AwsService_Unavailable_Error";
-        this.critic=true;
-        this.service=service;
     }
 }
 
-class AwsService_Unknown_Error extends InternalError{
+class AwsService_Unknown_Error extends AwsService_Error{
     constructor(message,attachedError,service){
         super(message,attachedError);
         this.name="AwsService_Unknown_Error";
-        this.critic=true;
-        this.service=service;
     }
 }
 
 module.exports= {aws_errorHandler,
+    AwsService_Error,
     AwsService_TimeOut_Error,
     AwsService_Unavailable_Error,
     AwsService_Unknown_Error
