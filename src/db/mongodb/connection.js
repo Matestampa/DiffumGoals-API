@@ -8,24 +8,22 @@ const { internalError_handler, InternalError } = require("../../error_handling")
 const connectionString=MONGODB_VARS.url;
 
 
-async function connect(){
+async function connect_MongoDB(){
     try{
         await mongoose.connect(connectionString);
-        return {error:false}
     }
 
     catch(e){
-        //Already handled by "EROR HANDLING" BELOW
-        return {error:true} //Just return error to let the caller know
+        throw new MongoDB_Error("",e)
     }
 }
 
-async function disconnect(){
+async function disconnect_MongoDB(){
     mongoose.connection.close();
 }
 
 //------------------- ERROR HANDLING --------------------------------
-mongoose.connection.on("error",e=>{
+/*mongoose.connection.on("error",e=>{
     internalError_handler(new MongoDB_Connection_Error("",e));
 })
 
@@ -36,7 +34,15 @@ class MongoDB_Connection_Error extends InternalError{
         this.name="MongoDB_Connection_Error";
         this.critic=true;
     }
+}*/
+
+class MongoDB_Error extends InternalError{
+    constructor(message,attachedError){
+        super(message,attachedError)
+        this.name="MongoDB_Error";
+        this.critic=true;
+    }
 }
 
 
-module.exports= {connect,disconnect};
+module.exports= {connect_MongoDB,disconnect_MongoDB,MongoDB_Error};
