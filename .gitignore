@@ -1,4 +1,5 @@
 /node_modules
+/Anotaciones
 
 .env.dev
 .env.prod
