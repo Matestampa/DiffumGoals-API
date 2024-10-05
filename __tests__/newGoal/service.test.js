@@ -1,10 +1,11 @@
-const { newGoal_Service } = require('../../src/services/newGoal/newGoalService.js');
+const { newGoal_Service } = require('../../src/api/newGoal/service/newGoalService.js');
+const { newGoal_errorHandler } = require('../../src/api/newGoal/service/error_handler.js');
+
 const { S3_FUNCS,AWS_GEN_ERRORS } = require('../../src/aws_services/index.js');
 const {DEFLT_API_ERRORS}=require("../../src/error_handling/index.js");
 //const { generateRand_MONGO_S3_ids } = require('../../src/services/newGoal/utils.js');
 const { GoalModel } = require('../../src/db/mongodb/index.js');
 const { MongoDB_Error } = require('../../src/db/mongodb/index.js');
-const { newGoal_errorHandler } = require('../../src/services/newGoal/error_handler.js');
 
 
 jest.mock('../../src/aws_services');
@@ -15,7 +16,7 @@ jest.mock('../../src/db/mongodb');
     newGoal_errorHandler: jest.fn().mockResolvedValue(DEFLT_API_ERRORS.SERVER()),
 }));*/
 
-jest.mock('../../src/services/newGoal/error_handler.js');
+jest.mock('../../src/api/newGoal/service/error_handler.js');
 
 
 describe('newGoal_Service', () => {

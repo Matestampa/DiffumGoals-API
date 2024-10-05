@@ -1,13 +1,13 @@
 
-const {DFLT_IMG_SIZE}=require("./const_vars.js");
+const {DFLT_IMG_SIZE}=require("../const_vars.js");
 
 const {get_diffumColor,
        get_cant_pix_xday,
        get_untouchedPixArr,
        generateRand_MONGO_S3_ids}=require("./utils.js");
 
-const {S3_FUNCS}=require("../../aws_services");
-const {GoalModel}=require("../../db/mongodb");
+const {S3_FUNCS}=require("../../../aws_services");
+const {GoalModel}=require("../../../db/mongodb");
 
 const {newGoal_errorHandler}=require("./error_handler.js");
 
