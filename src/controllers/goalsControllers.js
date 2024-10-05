@@ -1,9 +1,9 @@
 const {apiError_handler}=require("../error_handling");
 const {normal_response}=require("../middlewares/response.js");
 
-const {validate_newGoal}=require("../validators/goalsValidators.js");
+const {validate_newGoal}=require("../api/newGoal/validator.js");   
 
-const {newGoal_Service}=require("../services/newGoal/newGoalService.js");
+const {newGoal_Service}=require("../api/newGoal/service/newGoalService.js"); 
 
 
 async function newGoal(req,res){

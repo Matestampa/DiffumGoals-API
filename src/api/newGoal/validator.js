@@ -1,16 +1,16 @@
 const Joi=require("joi")
 const sharp=require("sharp")
 
-const {DEFLT_API_ERRORS}=require("../error_handling/index.js");
+const {DEFLT_API_ERRORS}=require("../../error_handling");
 
 //###### CONST VARS FOR VALIDATION ########
+
 //limit_date bounds
 const MIN_LIMITDATE_DAYS=15;
 const MAX_LIMITDATE_DAYS=90;
 
 //Image size
-const IMG_WIDTH=100;
-const IMG_HEIGHT=100;
+const {DFLT_IMG_SIZE}=require("./const_vars.js");
 
 //#########################################
 
@@ -40,7 +40,7 @@ async function validate_newGoalImg(reqImgFile){
    let image=sharp(reqImgFile.buffer);
    let metadata=await image.metadata();
    
-   if (metadata.width!=IMG_WIDTH || metadata.height!=IMG_HEIGHT){
+   if (metadata.width!=DFLT_IMG_SIZE.width || metadata.height!=DFLT_IMG_SIZE.height){
       return {error:true};
    }
    return {error:false};

@@ -1,13 +1,13 @@
 
-const {DEFLT_API_ERRORS}=require("../../error_handling");
-const {internalError_handler,GEN_INT_ERRORS}=require("../../error_handling");
+const {DEFLT_API_ERRORS}=require("../../../error_handling");
+const {internalError_handler,GEN_INT_ERRORS}=require("../../../error_handling");
 
 //-------- MONGODB/MONGOOSE ERRORS ------------------
 const {Error}=require("mongoose");
-const {MongoDB_Error}=require("../../db/mongodb");
+const {MongoDB_Error}=require("../../../db/mongodb");
 
 //-------- AWS ERRORS ---------------------
-const {AWS_GEN_ERRORS}=require("../../aws_services");
+const {AWS_GEN_ERRORS}=require("../../../aws_services");
 
 
 async function newGoal_errorHandler(error){

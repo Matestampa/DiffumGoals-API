@@ -5,10 +5,10 @@ const {App}=require("../../src/app.js");
 
 const {DEFLT_API_ERRORS}=require("../../src/error_handling");
 
-const {newGoal_Service}=require("../../src/services/newGoal/newGoalService.js");
-const {validate_newGoal}=require("../../src/validators/goalsValidators.js");
-jest.mock("../../src/services/newGoal/newGoalService.js");
-jest.mock("../../src/validators/goalsValidators.js");
+const {newGoal_Service}=require("../../src/api/newGoal/service/newGoalService.js");
+const {validate_newGoal}=require("../../src/api/newGoal/validator.js");
+jest.mock("../../src/api/newGoal/service/newGoalService.js");
+jest.mock("../../src/api/newGoal/validator.js");
 
 const api=supertest(App);
 

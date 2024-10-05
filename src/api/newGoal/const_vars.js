@@ -1,5 +1,3 @@
-
-
 //-------- DEFAULT IMAGE SIZE --------------
 const DFLT_IMG_SIZE={
     width:100,

@@ -1,5 +1,5 @@
-
-const {validate_newGoal}=require("../../src/validators/goalsValidators.js");
+const {validate_newGoal}=require("../../src/api/newGoal/validator.js");
+const {DFLT_IMG_SIZE}=require("../../src/api/newGoal/const_vars.js");
 const {DEFLT_API_ERRORS}=require("../../src/error_handling");
 const sharp = require('sharp');
 
@@ -11,8 +11,8 @@ describe('validate_newGoal', () => {
     beforeAll(async () => {
         let imgBuffer = await sharp({
             create: {
-                width: 100,
-                height: 100,
+                width: DFLT_IMG_SIZE.width,
+                height: DFLT_IMG_SIZE.height,
                 channels: 3,
                 background: { r: 255, g: 0, b: 0 },
             },
