@@ -1,12 +1,12 @@
 
-const {DFLT_IMG_SIZE}=require("../const_vars.js");
+const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {get_diffumColor,
        get_cant_pix_xday,
        get_untouchedPixArr,
        generateRand_MONGO_S3_ids}=require("./utils.js");
 
-const {S3_FUNCS}=require("../../../aws_services");
+const {S3_FUNCS,CLOUDFRONT}=require("../../../aws_services");
 const {GoalModel}=require("../../../db/mongodb");
 
 const {newGoal_errorHandler}=require("./error_handler.js");
@@ -56,8 +56,13 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
         
         return {error:user_error,data:null};
     }
+    
+    //Get Signed URL for created image
+    let img_url=CLOUDFRONT.get_SignedUrl(s3_id
+                                        ,new Date(Date.now()+SGNDURL_LIMITDATE_MS)
+    );
 
-    return {error:null,data:{goal_id:db_id,img_id:s3_id}}
+    return {error:null,data:{goal_id:db_id,img_url:img_url}}
 }
 
 module.exports={newGoal_Service};

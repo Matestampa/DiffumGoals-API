@@ -4,4 +4,6 @@ const DFLT_IMG_SIZE={
     height:100
 };
 
-module.exports={DFLT_IMG_SIZE};
+const SGNDURL_LIMITDATE_MS=1000*60*60; //1 hour
+
+module.exports={DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS};

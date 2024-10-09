@@ -12,6 +12,7 @@ async function start(){
     let error=false;
     try{
         await connect_MongoDB();
+        console.log("Connected to MongoDB");
     }
     catch(e){
         error=true;

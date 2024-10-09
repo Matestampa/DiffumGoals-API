@@ -1,6 +1,6 @@
 
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const { AWS_S3_VARS } = require("../config/s3_config.js");
+const { AWS_S3_VARS } = require("../config/aws_config.js");
 const { aws_errorHandler } = require("./error_handler.js");
 
 //----------------------- S3 class client & vars---------------------------
