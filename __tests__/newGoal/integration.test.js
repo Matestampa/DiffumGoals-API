@@ -62,7 +62,7 @@ describe('Integration test for POST /goals/new', () => {
         validate_newGoal.mockResolvedValueOnce(true);
         newGoal_Service.mockResolvedValueOnce({
           error:undefined,
-          data:{goal_id:"sds",img_id:""}
+          data:{goal_id:"sds",img_url:""}
         })
         
         const response = await prepareFields(api,"/goals/new",
@@ -76,7 +76,7 @@ describe('Integration test for POST /goals/new', () => {
         // Validar la respuesta
         expect(response.status).toBe(200); // Espera un estado 201 (creado)
         expect(response.body.data).toHaveProperty('goal_id'); // Debe tener la propiedad db_id
-        expect(response.body.data).toHaveProperty('img_id'); // Debe tener la propiedad s3_id
+        expect(response.body.data).toHaveProperty('img_url'); // Debe tener la propiedad s3_id
     });
 
     it ("should return 404 error for bad req data",async ()=>{

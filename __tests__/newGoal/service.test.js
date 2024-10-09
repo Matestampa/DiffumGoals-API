@@ -47,7 +47,7 @@ describe('newGoal_Service', () => {
         // Expect no errors
         expect(result.error).toBeNull();
         expect(result.data).toHaveProperty('goal_id');
-        expect(result.data).toHaveProperty('img_id');
+        expect(result.data).toHaveProperty('img_url');
 
         // Verify S3 and MongoDB were called
         expect(S3_FUNCS.saveObject).toHaveBeenCalled();

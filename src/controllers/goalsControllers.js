@@ -25,7 +25,7 @@ async function newGoal(req,res){
 
     normal_response(res,"",{
         goal_id:data.goal_id,
-        img_id:data.img_id
+        img_url:data.img_url
     })
 }
 
