@@ -22,11 +22,6 @@ const goalSchema = new Schema({
       required: true,
       description: "Name of file in the S3 bucket",
     },
-    untouched_pix: {
-      type: [[Number]],
-      required: true,
-      description: "Array of untouched pixel positions",
-    },
     cant_pix_xday:{
       type:Number,
       require:true,
@@ -40,6 +35,12 @@ const goalSchema = new Schema({
     last_diffumDate: {
       type: Date,
       required: true,
+    },
+    expired: {
+      type: Boolean,
+      required: false,
+      default: false,
+      description: "Indicates if the goal has expired"
     }
   }, {
     timestamps: { createdAt: true, updatedAt: false }
