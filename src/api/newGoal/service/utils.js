@@ -17,7 +17,7 @@ function get_cant_pix_xday(total_imgPix,limit_date){
   let differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
   
   //Return cant pix x day, rounded down.
-  const result = Math.floor(total_imgPix / differenceInDays);
+  const result = Math.ceil(total_imgPix / differenceInDays);
 
   return result;
 }
