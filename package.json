@@ -2,19 +2,34 @@
   "name": "api",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
+    "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
+    "testProd":"cross-env APP_ENV=testProd nodemon ./src/index.js",
+    "test": "cross-env APP_ENV=dev jest"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.657.0",
+    "@aws-sdk/cloudfront-signer": "^3.662.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
-    "joi": "^17.13.3"
+    "joi": "^17.13.3",
+    "mongoose": "^8.6.4",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }

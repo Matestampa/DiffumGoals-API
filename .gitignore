@@ -1,1 +1,6 @@
 /node_modules
+/Anotaciones
+
+.env.dev
+.env.prod
+.env.testProd
