@@ -14,7 +14,7 @@ const {newGoal_errorHandler}=require("./error_handler.js");
 async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
     
     //get diffum color
-    let diffum_color=get_diffumColor(imgBuffer);
+    let diffum_color=await get_diffumColor(imgBuffer);
 
     let cant_pix_xday=get_cant_pix_xday(DFLT_IMG_SIZE.width*DFLT_IMG_SIZE.height, limit_date);
     
