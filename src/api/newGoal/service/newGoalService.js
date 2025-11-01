@@ -3,7 +3,6 @@ const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {get_diffumColor,
        get_cant_pix_xday,
-       get_untouchedPixArr,
        generateRand_MONGO_S3_ids}=require("./utils.js");
 
 const {S3_FUNCS,CLOUDFRONT}=require("../../../aws_services");
@@ -18,9 +17,6 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
     let diffum_color=get_diffumColor(imgBuffer);
 
     let cant_pix_xday=get_cant_pix_xday(DFLT_IMG_SIZE.width*DFLT_IMG_SIZE.height, limit_date);
-    
-    //get pixel pos array
-    let untouched_pix=get_untouchedPixArr(DFLT_IMG_SIZE.width,DFLT_IMG_SIZE.height);
     
     //generate id for DB & S3
     let {db_id,s3_id}=generateRand_MONGO_S3_ids();
@@ -42,7 +38,6 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
             descr:descr,
             limit_date:limit_date,
             s3_imgName:s3_id,
-            untouched_pix:untouched_pix,
             cant_pix_xday:cant_pix_xday, ////--------------
             diffum_color:diffum_color,
             last_diffumDate:new Date()
