@@ -22,19 +22,6 @@ function get_cant_pix_xday(total_imgPix,limit_date){
   return result;
 }
 
-//Crear array o traerlo
-function get_untouchedPixArr(width,height){
-    let pixelCoords=[];
-
-     for (let y = 0; y < height; y++) {
-        for (let x=0;x<width;x++){
-          pixelCoords.push([x,y]);
-        }
-    }
-    return pixelCoords
-}
-
-
 //hacer id para db y s3
 function generateRand_MONGO_S3_ids(){
     
@@ -47,5 +34,4 @@ function generateRand_MONGO_S3_ids(){
 
 module.exports={get_diffumColor,
                 get_cant_pix_xday,
-                get_untouchedPixArr,
                 generateRand_MONGO_S3_ids};
