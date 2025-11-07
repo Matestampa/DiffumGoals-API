@@ -1,6 +1,14 @@
 const crypto = require('crypto');
 const sharp = require('sharp');
 
+const {GoalModel}=require("../../../db/mongodb");
+
+
+async function countCurrentGoals(){
+    let currentGoalsCount=await GoalModel.countDocuments();
+    
+    return currentGoalsCount;
+}
 
 
 //Determinar el color
@@ -101,6 +109,7 @@ function generateRand_MONGO_S3_ids(){
 }
 
 
-module.exports={get_diffumColor,
+module.exports={countCurrentGoals,
+                get_diffumColor,
                 get_cant_pix_xday,
                 generateRand_MONGO_S3_ids};
