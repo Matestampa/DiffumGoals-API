@@ -1,17 +1,34 @@
+const {GOALS_LOGIC_VARS}=require("../../../config/app_config.js");
 
 const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
-const {get_diffumColor,
+const {countCurrentGoals,
+       get_diffumColor,
        get_cant_pix_xday,
-       generateRand_MONGO_S3_ids}=require("./utils.js");
+       generateRand_MONGO_S3_ids,}=require("./utils.js");
 
 const {S3_FUNCS,CLOUDFRONT}=require("../../../aws_services");
 const {GoalModel}=require("../../../db/mongodb");
 
 const {newGoal_errorHandler}=require("./error_handler.js");
 
+const {DEFLT_API_ERRORS} = require("../../../error_handling");
+
 
 async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
+
+    //Check Goals Limit
+    try{
+        let currentGoalsCount=await countCurrentGoals();
+        if (currentGoalsCount>=GOALS_LOGIC_VARS.limit){
+            return {error:DEFLT_API_ERRORS.BAD_REQ("Goals Limit Reached"),data:null};
+        }
+    }
+    catch(e){
+        let user_error=await newGoal_errorHandler(e);
+        return {error:user_error,data:null};
+    }
+
     
     //get diffum color
     let diffum_color=await get_diffumColor(imgBuffer);

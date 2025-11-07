@@ -10,4 +10,11 @@ const APP_CONN_VARS={
     port:process.env.PORT,
 }
 
-module.exports= {APP_CONN_VARS};
+
+//Goals Logic vars
+
+const GOALS_LOGIC_VARS={
+    limit:process.env.GOALS_LIMIT
+}
+
+module.exports= {APP_CONN_VARS, GOALS_LOGIC_VARS};
