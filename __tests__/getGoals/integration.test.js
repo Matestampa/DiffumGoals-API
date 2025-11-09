@@ -39,6 +39,7 @@ describe('GET /goals', () => {
             expect(goal).toHaveProperty('descr');
             expect(goal).toHaveProperty('limit_date');
             expect(goal).toHaveProperty('img_url');
+            expect(goal).toHaveProperty('expired');
         });
     });
 
