@@ -1,6 +1,8 @@
-/node_modules
-/Anotaciones
-
 .env.dev
 .env.prod
 .env.testProd
+
+/src/logs/files
+
+/node_modules
+/Anotaciones
