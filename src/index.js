@@ -6,13 +6,15 @@ const {connect_MongoDB} = require("./db/mongodb");
 
 const { internalError_handler } = require("./error_handling/index.js");
 
+const {infoLogger} = require("./logs/loggers.js");
+
 const PORT=APP_CONN_VARS.port;
 
 async function start(){
     let error=false;
     try{
         await connect_MongoDB();
-        console.log("Connected to MongoDB");
+        infoLogger.info("Connected to MongoDB");
     }
     catch(e){
         error=true;
@@ -21,7 +23,7 @@ async function start(){
 
     if (!error){
         App.listen(PORT,()=>{
-            console.log(`App running on port:${PORT}`);
+            infoLogger.info(`App running on port:${PORT}`);
         }) 
     }
 

@@ -2,16 +2,20 @@
 
 //const {sendMail}=require("../../extra_services/mail.js");
 
+const {infoLogger,errorLogger} = require("../../logs/loggers.js");
+
 async function internalError_handler(error){
     //Si es critico, tira abajo el server o las requests.
     if (error.critic){
       //disable_requests();
       
-      console.log("REQUESTS DISABLED")
+      //console.log("REQUESTS DISABLED")
+
     }
 
     //Logearlo
-    console.log(error);
+    infoLogger.info(error)
+    errorLogger.error(error);
     
     //Enviar mail
     //send_ErrorMail(error.name,error.message,error.critic);

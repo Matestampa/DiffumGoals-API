@@ -5,7 +5,7 @@
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
     "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
-    "testProd":"cross-env APP_ENV=testProd nodemon ./src/index.js",
+    "testProd": "cross-env APP_ENV=testProd nodemon ./src/index.js",
     "test": "cross-env APP_ENV=dev jest"
   },
   "author": "",
@@ -23,7 +23,8 @@
     "joi": "^17.13.3",
     "mongoose": "^8.6.4",
     "multer": "^1.4.5-lts.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "winston": "^3.18.3"
   },
   "jest": {
     "testEnvironment": "node"

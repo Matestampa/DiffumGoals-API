@@ -29,7 +29,8 @@ function applySignedUrls_4_goals(goals) {
         delete goal["s3_imgName"];
         modifiedGoals.push(goal);
     }
-    //console.log(modifiedGoals);
+    
+    
     return modifiedGoals;
 }
 
