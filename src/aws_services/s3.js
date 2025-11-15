@@ -6,7 +6,12 @@ const { aws_errorHandler } = require("./error_handler.js");
 //----------------------- S3 class client & vars---------------------------
 
 const S3=new S3Client({
-    region:AWS_S3_VARS.bucketRegion
+    region:AWS_S3_VARS.bucketRegion,
+    credentials : {
+        accessKeyId : AWS_S3_VARS.accessKeyId,
+        secretAccessKey : AWS_S3_VARS.secretAccessKey
+
+    }
 })
 
 const BUCKET_NAME=AWS_S3_VARS.bucketName;
