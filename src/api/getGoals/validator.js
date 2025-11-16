@@ -14,7 +14,7 @@ function validate_getGoals(query) {
     const { error, value } = getGoals_ValSchema.validate(query);
 
     if (error) {
-        return { error: DEFLT_API_ERRORS.BAD_REQ(), queryData:null };
+        return { error: DEFLT_API_ERRORS.BAD_REQ(error.message), queryData:null };
     }
 
     return {error: null,
