@@ -26,7 +26,10 @@ const newGoal_ValSchema=Joi.object({
     limit_date: Joi.date().
                 min(addDays(MIN_LIMITDATE_DAYS)).
                 max(addDays(MAX_LIMITDATE_DAYS))
-                .required(), // limit date, ISO format.
+                .required().messages({
+                    "date.min": `"limit_date" must be at least ${MIN_LIMITDATE_DAYS} days in the future and a maximum of ${MAX_LIMITDATE_DAYS} days in the future`,
+                    "date.max": `"limit_date" must be at least ${MIN_LIMITDATE_DAYS} days in the future and a maximum of ${MAX_LIMITDATE_DAYS} days in the future`
+                }),
 });
 
 
@@ -34,14 +37,14 @@ const newGoal_ValSchema=Joi.object({
 async function validate_newGoalImg(reqImgFile){
 
    //Validate existence & format
-   if (!reqImgFile || reqImgFile.mimetype!="image/png"){return {error:true}}
+   if (!reqImgFile || reqImgFile.mimetype!="image/png"){return {error:true,message:"Image must be png"}}
    
    //Validate size
    let image=sharp(reqImgFile.buffer);
    let metadata=await image.metadata();
    
    if (metadata.width!=DFLT_IMG_SIZE.width || metadata.height!=DFLT_IMG_SIZE.height){
-      return {error:true};
+      return {error:true,message:`Image must be ${DFLT_IMG_SIZE.width}x${DFLT_IMG_SIZE.height}`};
    }
    return {error:false};
 }
@@ -49,15 +52,15 @@ async function validate_newGoalImg(reqImgFile){
 
 //##### VALIDATION OF GENERAL REQ.BODY FIELDS & IMAGE ########
 async function validate_newGoal(reqBody,reqImgFile){
-    let error;
+    let error,message;
 
     ({error}=newGoal_ValSchema.validate(reqBody))
 
-    if (error){return {error:DEFLT_API_ERRORS.BAD_REQ("Wrong body req data")}}
+    if (error){return {error:DEFLT_API_ERRORS.BAD_REQ(error.message)}}
 
-    ({error}=await validate_newGoalImg(reqImgFile))
+    ({error,message}=await validate_newGoalImg(reqImgFile))
 
-    if (error){return {error:DEFLT_API_ERRORS.BAD_REQ("Wrong img data")}}
+    if (error){return {error:DEFLT_API_ERRORS.BAD_REQ(message)}}
 
     return {error:undefined};
 
