@@ -5,6 +5,9 @@ const {MongoDB_Error} = require("../../../db/mongodb");
 const {GEN_INT_ERRORS, internalError_handler} = require("../../../error_handling");
 const {DEFLT_API_ERRORS} = require("../../../error_handling");
 
+const {AWS_GEN_ERRORS} = require("../../../aws_services");
+
+
 async function getGoals_errorHandler(error){
     if (error instanceof AWS_GEN_ERRORS.AwsService_Error){ //error from AWS
         internalError_handler(error);
