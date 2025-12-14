@@ -15,7 +15,8 @@ async function internalError_handler(error){
 
     //Logearlo
     infoLogger.info(error)
-    errorLogger.error(error);
+    errorLogger.error(error.message ? error.message : ".", { errorName:error.name,errorMessage:error.message, stack: error.stack,attachedError:error.attachedError });
+
     
     //Enviar mail
     //send_ErrorMail(error.name,error.message,error.critic);

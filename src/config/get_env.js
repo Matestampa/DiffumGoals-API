@@ -12,6 +12,7 @@ dotenv.config({path:env_absPath});
 
 
 function get_env(){
+    return APP_ENV;
 }
 
 module.exports= {get_env};
