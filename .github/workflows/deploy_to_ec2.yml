@@ -1,0 +1,81 @@
+name: Deploy to AWS EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment : ${{ github.ref_name == 'master' && 'production' || 'dev' }}
+    
+    steps:
+      - name: Show context
+        run: |
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Environment: ${{ github.ref_name == 'master' && 'production' || 'dev' }}"
+
+      - name: Deploy to EC2 via SSH
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          APP_DIR: ${{ vars.EC2_APP_DIR }}
+          REPO_NAME : ${{ vars.REPO_NAME }}
+          REPO_URL: ${{ vars.REPO_URL }}
+          REPO_BRANCH: ${{ vars.REPO_BRANCH }}
+          PM2_PROCESS_NAME: ${{ vars.PM2_PROCESS_NAME }}
+          NPM_SCRIPT_NAME: ${{ vars.NPM_SCRIPT_NAME }}
+        run: |
+          echo "${EC2_SSH_KEY}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
+            
+            cd ${APP_DIR}
+
+            echo "PWD now:"
+            pwd
+
+            echo "Listing APP_DIR:"
+            ls -la
+            
+            if [ -d "./${REPO_NAME}/.git" ]; then
+              cd "${REPO_NAME}"
+              echo "Repository exists, pulling latest changes from ${REPO_BRANCH} branch..."
+              git pull origin ${REPO_BRANCH}
+            else
+              echo "Repository not foundd, cloning ${REPO_BRANCH} branch..."
+              git clone -b ${REPO_BRANCH} ${REPO_URL}
+              cd "${REPO_NAME}"
+            fi
+
+            echo "Instalando dependencias..."
+
+            npm ci
+
+            echo "Actualizando el paquete de schemas @matestampa/diffum-goals_mongoose-schemas"
+            npm update "@matestampa/diffum-goals_mongoose-schemas"
+
+            echo "Chequeando si existe el proceso PM2: ${PM2_PROCESS_NAME}"
+
+            if pm2 list | grep -q "${PM2_PROCESS_NAME}"; then
+              echo "Proceso encontrado, reiniciando..."
+              pm2 restart ${PM2_PROCESS_NAME}
+            else
+              echo "Proceso NO encontrado, iniciando por primera vez..."
+              pm2 start npm --name ${PM2_PROCESS_NAME} -- run ${NPM_SCRIPT_NAME} --restart-delay 10000
+            fi
+
+            echo "Chequeando si API esta UP"
+            
+            sleep 5
+            if curl -fs http://localhost:3000/serverUp > /dev/null; then
+              echo "API is UP and responding correctly"
+            else
+              pm2 stop ${PM2_PROCESS_NAME}
+              echo "API health check FAILED"
+              exit 1
+            fi
+
+          EOF
+          rm -f ec2_key.pem
