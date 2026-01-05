@@ -108,8 +108,19 @@ function generateRand_MONGO_S3_ids(){
     return {db_id,s3_id};
 }
 
+function generate_S3Images_names(randId){
+    //Generate a timestamp and only apply it to the diffum image
+    const timestamp = Date.now();
+
+    let original_image_name=randId+"_original";
+    let latest_image_name=randId+"_"+timestamp;
+
+    return {original_image_name,latest_image_name};
+}
+
 
 module.exports={countCurrentGoals,
                 get_diffumColor,
                 get_cant_pix_xday,
-                generateRand_MONGO_S3_ids};
+                generateRand_MONGO_S3_ids,
+                generate_S3Images_names};
