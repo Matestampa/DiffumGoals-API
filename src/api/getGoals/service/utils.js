@@ -19,6 +19,17 @@ async function getGoals_fromDB(page,limitDate_order){
     }
 }
 
+async function getGoal_originalImage_fromDB(goal_id){
+    try {
+        return await GoalModel.findById(goal_id)
+            .select('s3_imgName_original')
+            .lean();
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
 //Receives array of goals objects and returns the same array with the signed URL image
 //applied to each goal. Adds "imgUrl" and removes "s3_imgName".
 function applySignedUrls_4_goals(goals) {
@@ -30,8 +41,13 @@ function applySignedUrls_4_goals(goals) {
         modifiedGoals.push(goal);
     }
     
-    
     return modifiedGoals;
 }
 
-module.exports={getGoals_fromDB,applySignedUrls_4_goals}
+function getSignedUrl(s3_imgName){
+
+    return CLOUDFRONT.get_SignedUrl(s3_imgName, new Date(Date.now() + SGNDURL_LIMITDATE_MS));
+
+}
+
+module.exports={getGoals_fromDB,getGoal_originalImage_fromDB,applySignedUrls_4_goals,getSignedUrl};

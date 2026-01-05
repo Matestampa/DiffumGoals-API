@@ -27,6 +27,7 @@ router.use(function (err, req, res, next) {
 
 router.get("/all",GoalsController.getGoals);
 
+router.get("/:id/originalImage", GoalsController.getGoal_originalImage);
 
 const goalsRouter=router;
 
