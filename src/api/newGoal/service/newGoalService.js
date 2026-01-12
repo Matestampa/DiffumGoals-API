@@ -5,7 +5,7 @@ const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 const {countCurrentGoals,
        get_diffumColor,
        get_cant_pix_xday,
-       generateRand_MONGO_S3_ids,}=require("./utils.js");
+       generateRand_MONGO_S3_ids,generate_S3Images_names}=require("./utils.js");
 
 const {S3_FUNCS,CLOUDFRONT}=require("../../../aws_services");
 const {GoalModel}=require("../../../db/mongodb");
@@ -38,9 +38,13 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
     //generate id for DB & S3
     let {db_id,s3_id}=generateRand_MONGO_S3_ids();
 
+    //generate S3 image names
+    let {original_image_name,latest_image_name}=generate_S3Images_names(s3_id);
+
     //Save To S3
     try{
-        await S3_FUNCS.saveObject(s3_id,imgBuffer,"image/png");
+        await S3_FUNCS.saveObject(original_image_name,imgBuffer,"image/png");
+        await S3_FUNCS.saveObject(latest_image_name,imgBuffer,"image/png");
     }
     catch(e){
         let user_error=await newGoal_errorHandler(e);
@@ -54,7 +58,8 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
             user_id:user_id,
             descr:descr,
             limit_date:limit_date,
-            s3_imgName:s3_id,
+            s3_imgName_original:original_image_name,
+            s3_imgName_latest:latest_image_name,
             cant_pix_xday:cant_pix_xday, ////--------------
             diffum_color:diffum_color,
             last_diffumDate:new Date()
@@ -70,7 +75,7 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
     }
     
     //Get Signed URL for created image
-    let img_url=CLOUDFRONT.get_SignedUrl(s3_id
+    let img_url=CLOUDFRONT.get_SignedUrl(latest_image_name
                                         ,new Date(Date.now()+SGNDURL_LIMITDATE_MS)
     );
 

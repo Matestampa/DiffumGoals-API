@@ -5,7 +5,7 @@ const {validate_newGoal}=require("../api/newGoal/validator.js");
 const {validate_getGoals}=require("../api/getGoals/validator.js");   
 
 const {newGoal_Service}=require("../api/newGoal/service/newGoalService.js"); 
-const {getGoals_Service} =require("../api/getGoals/service/getGoalsService.js");
+const {getGoals_Service,getGoal_originalImage_Service} =require("../api/getGoals/service/getGoalsService.js");
 
 
 async function newGoal(req,res){
@@ -55,7 +55,29 @@ async function getGoals(req,res){
     });
 
 }
+//:id/originalImage
+async function getGoal_originalImage(req,res){
+    //To be implemented
 
-const GoalsController={newGoal,getGoals}
+    let error;
+
+    //Validate id param
+    let goal_id=req.params.id;
+    if (!goal_id){
+        apiError_handler(DEFLT_API_ERRORS.BAD_REQ("Goal id param is required"),res);
+        return;
+    }
+
+    let data;
+    ({error,data}=await getGoal_originalImage_Service(goal_id));
+
+    if (error){apiError_handler(error,res);return};
+
+    normal_response(res,"",{
+        img_url:data.img_url
+    })
+}
+
+const GoalsController={newGoal,getGoals,getGoal_originalImage}
 
 module.exports=GoalsController;

@@ -2,7 +2,7 @@ const {PAGE_LIMIT, SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {getGoals_errorHandler}=require("./error_handler.js");
 
-const { getGoals_fromDB,applySignedUrls_4_goals } = require("./utils.js");
+const { getGoals_fromDB,getGoal_originalImage_fromDB,applySignedUrls_4_goals,getSignedUrl } = require("./utils.js");
 
 async function getGoals_Service(page,limitDate_order){
     let goals=[];
@@ -24,4 +24,24 @@ async function getGoals_Service(page,limitDate_order){
     return { error: null, data: { goals, nextPage } };   
 }
 
-module.exports={getGoals_Service};
+async function getGoal_originalImage_Service(goal_id){
+
+
+    let s3_imgName_original
+    try{
+        s3_imgName_original=await getGoal_originalImage_fromDB(goal_id);
+    }
+    catch(e){
+        let user_error=await getGoals_errorHandler(e);
+        return {error:user_error,data:null};
+    }
+
+    let original_image_signedUrl=getSignedUrl(s3_imgName_original.s3_imgName_original);
+
+    return {error:null,data:{img_url: original_image_signedUrl}};
+
+
+
+}
+
+module.exports={getGoals_Service,getGoal_originalImage_Service};
