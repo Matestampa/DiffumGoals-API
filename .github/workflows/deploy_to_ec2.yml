@@ -56,6 +56,13 @@ jobs:
             echo "Actualizando el paquete de schemas @matestampa/diffum-goals_mongoose-schemas"
             npm update "@matestampa/diffum-goals_mongoose-schemas"
 
+            echo "Deteniendo cualquier proceso PM2 existente"
+
+            pm2 stop all
+
+            sleep 2
+
+
             echo "Chequeando si existe el proceso PM2: ${PM2_PROCESS_NAME}"
 
             if pm2 list | grep -q "${PM2_PROCESS_NAME}"; then
