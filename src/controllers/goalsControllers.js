@@ -2,7 +2,7 @@ const {apiError_handler}=require("../error_handling");
 const {normal_response}=require("../middlewares/response.js");
 
 const {validate_newGoal}=require("../api/newGoal/validator.js");
-const {validate_getGoals}=require("../api/getGoals/validator.js");   
+const {validate_getGoals, validate_getGoal_originalImage}=require("../api/getGoals/validator.js");   
 
 const {newGoal_Service}=require("../api/newGoal/service/newGoalService.js"); 
 const {getGoals_Service,getGoal_originalImage_Service} =require("../api/getGoals/service/getGoalsService.js");
@@ -57,16 +57,17 @@ async function getGoals(req,res){
 }
 //:id/originalImage
 async function getGoal_originalImage(req,res){
-    //To be implemented
-
-    let error;
-
+    let error, paramData;
+    
     //Validate id param
-    let goal_id=req.params.id;
-    if (!goal_id){
-        apiError_handler(DEFLT_API_ERRORS.BAD_REQ("Goal id param is required"),res);
+    ({error, paramData} = validate_getGoal_originalImage(req.params));
+    
+    if (error) {
+        apiError_handler(error, res);
         return;
     }
+    
+    let {id: goal_id} = paramData;
 
     let data;
     ({error,data}=await getGoal_originalImage_Service(goal_id));
