@@ -30,6 +30,11 @@ async function getGoal_originalImage_Service(goal_id){
     let s3_imgName_original
     try{
         s3_imgName_original=await getGoal_originalImage_fromDB(goal_id);
+        if (!s3_imgName_original){
+            let user_error=await getGoals_errorHandler("NOT_FOUND");
+            return {error:user_error,data:null};
+
+        }
     }
     catch(e){
         let user_error=await getGoals_errorHandler(e);

@@ -16,6 +16,11 @@ async function getGoals_errorHandler(error){
     if (error instanceof Error){ //error from Mongoose
         internalError_handler(new MongoDB_Error(error));
     }
+
+    if (error==="NOT_FOUND"){
+        return DEFLT_API_ERRORS.BAD_REQ("Not found");
+    }
+
     else{
         internalError_handler(GEN_INT_ERRORS.UNKNOWN("",error)); //unknow error
     }
