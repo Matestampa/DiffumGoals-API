@@ -4,6 +4,7 @@ const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {countCurrentGoals,
        get_diffumColor,
+       add_4thChannelToBuffer,
        get_cant_pix_xday,
        generateRand_MONGO_S3_ids,generate_S3Images_names}=require("./utils.js");
 
@@ -31,7 +32,10 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
 
     
     //get diffum color
-    let diffum_color=await get_diffumColor(imgBuffer);
+    //let diffum_color=await get_diffumColor(imgBuffer);
+
+    //Add 4th channel to image buffer, to make transparency possible for diffum
+    imgBuffer=await add_4thChannelToBuffer(imgBuffer);
 
     let cant_pix_xday=get_cant_pix_xday(DFLT_IMG_SIZE.width*DFLT_IMG_SIZE.height, limit_date);
     
@@ -60,8 +64,7 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
             limit_date:limit_date,
             s3_imgName_original:original_image_name,
             s3_imgName_latest:latest_image_name,
-            cant_pix_xday:cant_pix_xday, ////--------------
-            diffum_color:diffum_color,
+            cant_pix_xday:cant_pix_xday,
             last_diffumDate:new Date()
         })
         await newGoal.save();

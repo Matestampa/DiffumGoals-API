@@ -84,6 +84,11 @@ async function get_diffumColor(imgBuffer){
      return [bestColor[0], bestColor[1], bestColor[2]];
 }
 
+async function add_4thChannelToBuffer(imgBuffer){
+    let newBuffer = await sharp(imgBuffer).ensureAlpha(1).toBuffer();
+    return newBuffer;
+}
+
 //Calcular cant de pix a diffum x dia
 function get_cant_pix_xday(total_imgPix,limit_date){
    let today=new Date();
@@ -121,6 +126,7 @@ function generate_S3Images_names(randId){
 
 module.exports={countCurrentGoals,
                 get_diffumColor,
+                add_4thChannelToBuffer,
                 get_cant_pix_xday,
                 generateRand_MONGO_S3_ids,
                 generate_S3Images_names};
