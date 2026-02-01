@@ -49,12 +49,9 @@ jobs:
               cd "${REPO_NAME}"
             fi
 
-            echo "Instalando dependencias..."
+            echo "Instalando dependencias con npm ci..."
 
             npm ci
-
-            echo "Actualizando el paquete de schemas @matestampa/diffum-goals_mongoose-schemas"
-            npm update "@matestampa/diffum-goals_mongoose-schemas"
 
             echo "Deteniendo cualquier proceso PM2 existente"
 
