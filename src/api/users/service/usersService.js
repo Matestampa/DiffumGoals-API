@@ -1,4 +1,4 @@
-const {get_user,create_user,compare_passwords,generate_JWT} = require("./utils.js");
+const {get_user,create_user,hash_password,compare_passwords,generate_JWT} = require("./utils.js");
 
 const {DEFLT_API_ERRORS} = require("../../../error_handling");
 const {users_errorHandler} = require("./error_handler.js");
@@ -14,8 +14,10 @@ async function register_Service(username, password) {
         }
         else{
             // Create new user
-            //Hashear password ============================================================
-            const newUser = await create_user(username, password);
+            
+            let hasshedPassword = await hash_password(password);
+
+            const newUser = await create_user(username, hasshedPassword);
             return {error: null, data: {
                 user_id: newUser._id,
                 username: newUser.username
