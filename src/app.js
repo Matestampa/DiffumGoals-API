@@ -4,11 +4,16 @@ const App = express();
 const cors=require("cors");
 
 const cookieParser = require("cookie-parser");
+
 //---------------------- IMPORT MIDLEWARES ---------------------
 
 
 //----------------------- IMPORT ROUTES ------------------------
+
+const usersRoutes = require("./routes/usersRoutes.js");
+
 const goalsRoutes = require("./routes/goalsRoutes.js");
+
 
 
 //-------------------- GENERAL EXPRESS CONFIG ---------------------
@@ -32,6 +37,9 @@ App.use(cookieParser());
 App.use("/serverUp",async (req,res)=>{
     res.send("Server Up")
 })
+
+
+App.use("/users",usersRoutes)
 
 App.use("/goals",goalsRoutes)
 
