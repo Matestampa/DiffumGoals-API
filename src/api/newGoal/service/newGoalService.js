@@ -60,6 +60,7 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
         let newGoal=new GoalModel({
             _id:db_id, // cambiar los models para q acepte _id
             user_id:user_id,
+            username:username,
             descr:descr,
             limit_date:limit_date,
             s3_imgName_original:original_image_name,
