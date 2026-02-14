@@ -9,13 +9,15 @@ const GoalsController = require("../controllers/goalsControllers.js");
 
 const {apiError_handler,DEFLT_API_ERRORS} = require("../error_handling")
 
+const {authentication} = require("../middlewares/auth.js");
+
 //----Config of multer middleware to upload imgs -------
 const storage = multer.memoryStorage();
 
 const upload = multer({storage: storage});
 //-----------------------------------------------------
 
-router.post("/new",upload.single("img"),GoalsController.newGoal);
+router.post("/new",upload.single("img"),authentication,GoalsController.newGoal);
 
 // ERROR HANDLER para Multer (por si no se manda el nombre del field)
 router.use(function (err, req, res, next) {

@@ -18,10 +18,12 @@ async function newGoal(req,res){
     if (error){apiError_handler(error,res);return};
     
     //Call cservice
-    let {user_id,descr,limit_date}=req.body;
+    let user_id=req.user_id;
+    let username=req.username;
+    let {descr,limit_date}=req.body;
 
     let data;
-    ({error,data}=await newGoal_Service(user_id,descr,limit_date,req.file.buffer))
+    ({error,data}=await newGoal_Service(user_id,username,descr,limit_date,req.file.buffer))
     
     if (error){apiError_handler(error,res);return};
 

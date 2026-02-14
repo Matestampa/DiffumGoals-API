@@ -3,6 +3,7 @@ const {GOALS_LOGIC_VARS}=require("../../../config/app_config.js");
 const {DFLT_IMG_SIZE,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {countCurrentGoals,
+       countCurrentGoalsByUser,
        get_diffumColor,
        add_4thChannelToBuffer,
        get_cant_pix_xday,
@@ -16,12 +17,20 @@ const {newGoal_errorHandler}=require("./error_handler.js");
 const {DEFLT_API_ERRORS} = require("../../../error_handling");
 
 
-async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
+async function newGoal_Service(user_id,username,descr,limit_date,imgBuffer){
 
     //Check Goals Limit
     try{
+
+        //By user
+        let userGoalsCount=await countCurrentGoalsByUser(user_id);
+        if (userGoalsCount>=GOALS_LOGIC_VARS.user_limit){
+            return {error:DEFLT_API_ERRORS.BAD_REQ("User's Goals Limit Reached"),data:null};
+        }
+
+        //Global
         let currentGoalsCount=await countCurrentGoals();
-        if (currentGoalsCount>=GOALS_LOGIC_VARS.limit){
+        if (currentGoalsCount>=GOALS_LOGIC_VARS.global_limit){
             return {error:DEFLT_API_ERRORS.BAD_REQ("Goals Limit Reached"),data:null};
         }
     }
@@ -30,7 +39,7 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
         return {error:user_error,data:null};
     }
 
-    
+
     //get diffum color
     //let diffum_color=await get_diffumColor(imgBuffer);
 
@@ -60,6 +69,7 @@ async function newGoal_Service(user_id,descr,limit_date,imgBuffer){
         let newGoal=new GoalModel({
             _id:db_id, // cambiar los models para q acepte _id
             user_id:user_id,
+            username:username,
             descr:descr,
             limit_date:limit_date,
             s3_imgName_original:original_image_name,

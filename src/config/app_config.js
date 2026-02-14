@@ -20,7 +20,8 @@ const AUTH_VARS={
 //Goals Logic vars
 
 const GOALS_LOGIC_VARS={
-    limit:process.env.GOALS_LIMIT
+    user_limit:process.env.GOALS_USER_LIMIT,
+    global_limit:process.env.GOALS_GLOBAL_LIMIT
 }
 
 module.exports= {APP_CONN_VARS, AUTH_VARS, GOALS_LOGIC_VARS};
