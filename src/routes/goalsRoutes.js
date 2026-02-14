@@ -19,6 +19,9 @@ const upload = multer({storage: storage});
 
 router.post("/new",upload.single("img"),authentication,GoalsController.newGoal);
 
+
+router.post("/complete",upload.single("img"),authentication,GoalsController.completeGoal);
+
 // ERROR HANDLER para Multer (por si no se manda el nombre del field)
 router.use(function (err, req, res, next) {
     if (err instanceof multer.MulterError) {
