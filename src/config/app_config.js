@@ -12,6 +12,7 @@ const APP_CONN_VARS={
 
 const AUTH_VARS={
     JWT_COOKIE_NAME:"token",
+    JWT_COOKIE_SECURE: process.env.JWT_COOKIE_SECURE,
     JWT_SECRET:process.env.JWT_SECRET,
     JWT_EXPIRATION_MS:process.env.JWT_EXPIRATION_MS
 }

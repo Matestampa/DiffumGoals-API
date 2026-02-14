@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const {AUTH_VARS} = require("../../../config/app_config");
 
 const {UserModel} = require("../../../db/mongodb");
@@ -7,6 +8,14 @@ const {UserModel} = require("../../../db/mongodb");
 
 
 const JWT_EXPIRATION_SECONDS = parseInt(AUTH_VARS.JWT_EXPIRATION_MS) / 1000;
+
+
+async function hash_password(password) {
+    const saltRounds = 5;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    return hashedPassword;
+}
+
 
 //Get use by username or id
 async function get_user(identifier){
@@ -35,8 +44,8 @@ async function create_user(username, password){
 }
 
 
-function compare_passwords(inputPassword, storedPassword) {
-    return inputPassword === storedPassword;
+async function compare_passwords(inputPassword, storedPassword) {
+    return await bcrypt.compare(inputPassword, storedPassword);
 }
 
 function generate_JWT(user_id, username) {
@@ -54,6 +63,7 @@ function generate_JWT(user_id, username) {
 module.exports = {
     get_user,
     create_user,
+    hash_password,
     compare_passwords,
     generate_JWT
 }
