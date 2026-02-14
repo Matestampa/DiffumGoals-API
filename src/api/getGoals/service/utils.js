@@ -9,7 +9,7 @@ async function getGoals_fromDB(page,limitDate_order){
     
     try {
         return await GoalModel.find()
-            .select('descr limit_date s3_imgName_latest expired')
+            .select('descr limit_date s3_imgName_latest expired completed')
             .sort({limit_date: limitDate_order})
             .skip((page-1)*PAGE_LIMIT)
             .limit(PAGE_LIMIT).lean();
