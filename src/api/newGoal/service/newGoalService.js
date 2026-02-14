@@ -75,7 +75,9 @@ async function newGoal_Service(user_id,username,descr,limit_date,imgBuffer){
             s3_imgName_original:original_image_name,
             s3_imgName_latest:latest_image_name,
             cant_pix_xday:cant_pix_xday,
-            last_diffumDate:new Date()
+            last_diffumDate:new Date(),
+            completed:false,
+            s3_imgName_completed:""
         })
         await newGoal.save();
     }
