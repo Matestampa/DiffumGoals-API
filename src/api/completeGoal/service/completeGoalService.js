@@ -52,6 +52,7 @@ async function completeGoal_Service(userId,goalId,imgBuffer){
         //Update db
         goalData["completed"] = true;
         goalData["s3_imgName_completed"] = s3ImageName;
+        goalData["completed_at"] = new Date();
         await goalData.save();
 
         return { error: null, data: { goal_id: goalId } };

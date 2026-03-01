@@ -9,7 +9,7 @@ async function getGoals_fromDB(page,limitDate_order){
     
     try {
         return await GoalModel.find()
-            .select('descr limit_date s3_imgName_latest expired completed')
+            .select('descr expired limit_date s3_imgName_latest completed completed_date s3_imgName_completed')
             .sort({limit_date: limitDate_order})
             .skip((page-1)*PAGE_LIMIT)
             .limit(PAGE_LIMIT).lean();
@@ -30,14 +30,25 @@ async function getGoal_originalImage_fromDB(goal_id){
     }
 }
 
-//Receives array of goals objects and returns the same array with the signed URL image
-//applied to each goal. Adds "imgUrl" and removes "s3_imgName".
-function applySignedUrls_4_goals(goals) {
+
+//Receives array of goals objects and returns the same array with signed URLs.
+//Always adds "img_latest" from s3_imgName_latest.
+//If completed === true, also adds "img_completed" from s3_imgName_completed.
+function add_imgsUrls(goals) {
     const modifiedGoals = [];
     for (let i = 0; i < goals.length; i++) {
-        const goal = goals[i]//.toObject(); // Convert Mongoose document to plain JavaScript object
-        goal["img_url"] = CLOUDFRONT.get_SignedUrl(goal.s3_imgName_latest, new Date(Date.now() + SGNDURL_LIMITDATE_MS));
+        const goal = goals[i];
+        
+        // Always sign the url from s3_imgName_latest and add as img_latest
+        goal["img_latest"] = getSignedUrl(goal.s3_imgName_latest);
         delete goal["s3_imgName_latest"];
+        
+        // If completed, also sign s3_imgName_completed and add as img_completed
+        if (goal.completed === true) {
+            goal["img_completed"] = getSignedUrl(goal.s3_imgName_completed);
+        }
+        delete goal["s3_imgName_completed"];
+        
         modifiedGoals.push(goal);
     }
     
@@ -50,4 +61,4 @@ function getSignedUrl(s3_imgName){
 
 }
 
-module.exports={getGoals_fromDB,getGoal_originalImage_fromDB,applySignedUrls_4_goals,getSignedUrl};
+module.exports={getGoals_fromDB,getGoal_originalImage_fromDB,add_imgsUrls,getSignedUrl};
