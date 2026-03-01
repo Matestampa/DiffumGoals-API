@@ -1,22 +1,24 @@
-const {PAGE_LIMIT, SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
+const {PAGE_LIMIT, GOALS_STATUS_CONFIG}=require("../const_vars.js");
 
 const {getGoals_errorHandler}=require("./error_handler.js");
 
 const { getGoals_fromDB,getGoal_originalImage_fromDB,add_imgsUrls,getSignedUrl } = require("./utils.js");
 
-async function getGoals_Service(page,limitDate_order){
+async function getGoals_Service(page, goalStatus, order){
     let goals=[];
     
+    // Get filter and orderField based on goalStatus
+    const { filter, orderField } = GOALS_STATUS_CONFIG[goalStatus];
+    
     try{
-        goals = await getGoals_fromDB(page,limitDate_order);
+        goals = await getGoals_fromDB(page, filter, orderField, order);
     } 
     catch(e){
         let user_error=await getGoals_errorHandler(e);
         return {error:user_error,data:null};
     }
     
-    // Add signedUrl to each goal
-    console.log(goals)
+    // Add signed URLs to each goal
     goals=add_imgsUrls(goals);
 
     //Know if there are more pages

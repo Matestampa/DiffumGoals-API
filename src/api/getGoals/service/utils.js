@@ -5,12 +5,13 @@ const {PAGE_LIMIT,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {GoalModel}=require("../../../db/mongodb");
 
-async function getGoals_fromDB(page,limitDate_order){
+// Fetches goals from DB with filter and dynamic sort field
+async function getGoals_fromDB(page, filter, orderField, order){
     
     try {
-        return await GoalModel.find()
+        return await GoalModel.find(filter)
             .select('descr expired limit_date s3_imgName_latest completed completed_date s3_imgName_completed')
-            .sort({limit_date: limitDate_order})
+            .sort({ [orderField]: order })
             .skip((page-1)*PAGE_LIMIT)
             .limit(PAGE_LIMIT).lean();
     }

@@ -2,11 +2,12 @@ const Joi = require("joi");
 
 const {DEFLT_API_ERRORS}=require("../../error_handling");
 
-const {DFLT_LIMITDATE_ORDER}=require("./const_vars.js");
+const {DFLT_ORDER, DFLT_GOAL_STATUS, VALID_GOAL_STATUSES}=require("./const_vars.js");
 
 const getGoals_ValSchema = Joi.object({
     page: Joi.number().integer().min(1).default(1),
-    limitDate_order: Joi.number().valid(1, -1).default(DFLT_LIMITDATE_ORDER)
+    goalStatus: Joi.string().valid(...VALID_GOAL_STATUSES).default(DFLT_GOAL_STATUS),
+    order: Joi.number().valid(1, -1).default(DFLT_ORDER)
 });
 
 const getGoal_originalImage_ValSchema = Joi.object({
@@ -23,9 +24,11 @@ function validate_getGoals(query) {
 
     return {error: null,
             queryData:{
-               page:value.page,
-               limitDate_order:value.limitDate_order}
-            };
+               page: value.page,
+               goalStatus: value.goalStatus,
+               order: value.order
+            }
+        };
 }
 
 function validate_getGoal_originalImage(params) {
