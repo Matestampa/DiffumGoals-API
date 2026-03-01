@@ -63,11 +63,11 @@ async function getGoals(req,res){
 
     if (error) {apiError_handler(error, res);return;}
     
-    let {page,limitDate_order}=queryData;
+    let {page, goalStatus, order}=queryData;
 
     // Call service
     let data;
-    ({error, data} = await getGoals_Service(page,limitDate_order));
+    ({error, data} = await getGoals_Service(page, goalStatus, order));
 
     if (error) {apiError_handler(error, res);return;}
 
