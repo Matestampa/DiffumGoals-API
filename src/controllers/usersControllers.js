@@ -33,6 +33,8 @@ async function login(req, res) {
 
     if (error) {apiError_handler(error, res); return;}
 
+    console.log(req.body);
+
     ({error, data} = await login_Service(req.body.username, req.body.password));
 
     if (error) {apiError_handler(error, res); return;}
@@ -41,7 +43,7 @@ async function login(req, res) {
     res.cookie(AUTH_VARS.JWT_COOKIE_NAME, data.token, {
         httpOnly: true,
         secure: AUTH_VARS.JWT_COOKIE_SECURE,
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: AUTH_VARS.JWT_EXPIRATION_MS
     });
 
