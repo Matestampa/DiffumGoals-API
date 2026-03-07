@@ -7,7 +7,7 @@ const {validate_getGoals, validate_getGoal_originalImage}=require("../api/getGoa
 
 const {newGoal_Service}=require("../api/newGoal/service/newGoalService.js"); 
 const {completeGoal_Service}=require("../api/completeGoal/service/completeGoalService.js");
-const {getGoals_Service,getGoal_originalImage_Service} =require("../api/getGoals/service/getGoalsService.js");
+const {getGoals_Service,getGoal_originalImage_Service,getMyGoals_Service} =require("../api/getGoals/service/getGoalsService.js");
 
 
 async function newGoal(req,res){
@@ -101,6 +101,23 @@ async function getGoal_originalImage(req,res){
     })
 }
 
-const GoalsController={newGoal,completeGoal,getGoals,getGoal_originalImage}
+async function getMyGoals(req,res){
+    
+    let user_id = req.user_id;
+    let page = parseInt(req.query.page) || 1;
+
+    // Call service
+    let error, data;
+    ({error, data} = await getMyGoals_Service(user_id, page));
+
+    if (error) {apiError_handler(error, res);return;}
+
+    normal_response(res, "", {
+        goals: data.goals,
+        nextPage: data.nextPage
+    });
+}
+
+const GoalsController={newGoal,completeGoal,getGoals,getGoal_originalImage,getMyGoals}
 
 module.exports=GoalsController;
