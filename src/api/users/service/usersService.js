@@ -42,7 +42,8 @@ async function login_Service(username, password) {
         }
 
         // Check password
-        const isPasswordValid = compare_passwords(password, user.password);
+        const isPasswordValid = await compare_passwords(password, user.password);
+        
         if (!isPasswordValid) {
             return {error: DEFLT_API_ERRORS.BAD_REQ("Invalid username or password"), data: null};
         }
