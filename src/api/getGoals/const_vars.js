@@ -9,9 +9,9 @@ const DFLT_ORDER = 1; //Default order direction (1 = ascending, -1 = descending)
 // Each status defines: filter (MongoDB query) and orderField (field to sort by)
 
 const GOALS_STATUS = {
-    DIFFUMING: 'diffuming',
-    EXPIRED: 'expired',
-    COMPLETED: 'completed'
+    DIFFUMING: 'DIFFUMING',
+    EXPIRED: 'EXPIRED',
+    COMPLETED: 'COMPLETED'
 };
 
 const GOALS_STATUS_CONFIG = {
