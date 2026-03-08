@@ -3,11 +3,11 @@ const {normal_response}=require("../middlewares/response.js");
 
 const {validate_newGoal}=require("../api/newGoal/validator.js");
 const {validate_completeGoal}=require("../api/completeGoal/validator.js");
-const {validate_getGoals, validate_getGoal_originalImage}=require("../api/getGoals/validator.js");   
+const {validate_getGoals}=require("../api/getGoals/validator.js");   
 
 const {newGoal_Service}=require("../api/newGoal/service/newGoalService.js"); 
 const {completeGoal_Service}=require("../api/completeGoal/service/completeGoalService.js");
-const {getGoals_Service,getGoal_originalImage_Service,getMyGoals_Service} =require("../api/getGoals/service/getGoalsService.js");
+const {getGoals_Service,getMyGoals_Service} =require("../api/getGoals/service/getGoalsService.js");
 
 
 async function newGoal(req,res){
@@ -77,29 +77,6 @@ async function getGoals(req,res){
     });
 
 }
-//:id/originalImage
-async function getGoal_originalImage(req,res){
-    let error, paramData;
-    
-    //Validate id param
-    ({error, paramData} = validate_getGoal_originalImage(req.params));
-    
-    if (error) {
-        apiError_handler(error, res);
-        return;
-    }
-    
-    let {id: goal_id} = paramData;
-
-    let data;
-    ({error,data}=await getGoal_originalImage_Service(goal_id));
-
-    if (error){apiError_handler(error,res);return};
-
-    normal_response(res,"",{
-        img_url:data.img_url
-    })
-}
 
 async function getMyGoals(req,res){
     
@@ -118,6 +95,6 @@ async function getMyGoals(req,res){
     });
 }
 
-const GoalsController={newGoal,completeGoal,getGoals,getGoal_originalImage,getMyGoals}
+const GoalsController={newGoal,completeGoal,getGoals,getMyGoals}
 
 module.exports=GoalsController;

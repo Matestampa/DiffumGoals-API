@@ -34,8 +34,6 @@ router.get("/all",GoalsController.getGoals);
 
 router.get("/myGoals",authentication,GoalsController.getMyGoals);
 
-router.get("/:id/originalImage", GoalsController.getGoal_originalImage);
-
 const goalsRouter=router;
 
 module.exports=goalsRouter;
