@@ -33,8 +33,6 @@ async function login(req, res) {
 
     if (error) {apiError_handler(error, res); return;}
 
-    console.log(req.body);
-
     ({error, data} = await login_Service(req.body.username, req.body.password));
 
     if (error) {apiError_handler(error, res); return;}
