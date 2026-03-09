@@ -56,7 +56,11 @@ async function login(req, res) {
 
 async function logout(req, res) {
 
-    res.clearCookie("token");
+    res.clearCookie(AUTH_VARS.JWT_COOKIE_NAME, {
+        httpOnly: true,
+        secure: AUTH_VARS.JWT_COOKIE_SECURE,
+        sameSite: "none"
+    });
 
     normal_response(res, "User logged out successfully");
 }
