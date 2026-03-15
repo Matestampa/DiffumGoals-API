@@ -1,22 +1,25 @@
-const {PAGE_LIMIT, SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
+const {PAGE_LIMIT, GOALS_STATUS_CONFIG}=require("../const_vars.js");
 
 const {getGoals_errorHandler}=require("./error_handler.js");
 
-const { getGoals_fromDB,getGoal_originalImage_fromDB,applySignedUrls_4_goals,getSignedUrl } = require("./utils.js");
+const { getGoals_fromDB,add_imgsUrls } = require("./utils.js");
 
-async function getGoals_Service(page,limitDate_order){
+async function getGoals_Service(page, goalStatus, order){
     let goals=[];
     
+    // Get filter and orderField based on goalStatus
+    const { filter, orderField } = GOALS_STATUS_CONFIG[goalStatus];
+    
     try{
-        goals = await getGoals_fromDB(page,limitDate_order);
+        goals = await getGoals_fromDB(page, filter, orderField, order);
     } 
     catch(e){
         let user_error=await getGoals_errorHandler(e);
         return {error:user_error,data:null};
     }
     
-    // Add signedUrl to each goal
-    goals=applySignedUrls_4_goals(goals);
+    // Add signed URLs to each goal
+    goals=add_imgsUrls(goals);
 
     //Know if there are more pages
     let nextPage = goals.length === PAGE_LIMIT ? page + 1 : null;
@@ -24,29 +27,27 @@ async function getGoals_Service(page,limitDate_order){
     return { error: null, data: { goals, nextPage } };   
 }
 
-async function getGoal_originalImage_Service(goal_id){
-
-
-    let s3_imgName_original
+async function getMyGoals_Service(user_id, page){
+    let goals=[];
+    
+    // Filter only by user_id, return all statuses
+    const userFilter = { user_id: user_id };
+    
     try{
-        s3_imgName_original=await getGoal_originalImage_fromDB(goal_id);
-        if (!s3_imgName_original){
-            let user_error=await getGoals_errorHandler("NOT_FOUND");
-            return {error:user_error,data:null};
-
-        }
-    }
+        goals = await getGoals_fromDB(page, userFilter, 'limit_date', 1);
+    } 
     catch(e){
         let user_error=await getGoals_errorHandler(e);
         return {error:user_error,data:null};
     }
+    
+    // Add signed URLs to each goal
+    goals=add_imgsUrls(goals);
 
-    let original_image_signedUrl=getSignedUrl(s3_imgName_original.s3_imgName_original);
-
-    return {error:null,data:{img_url: original_image_signedUrl}};
-
-
-
+    //Know if there are more pages
+    let nextPage = goals.length === PAGE_LIMIT ? page + 1 : null;
+    
+    return { error: null, data: { goals, nextPage } };   
 }
 
-module.exports={getGoals_Service,getGoal_originalImage_Service};
+module.exports={getGoals_Service,getMyGoals_Service};

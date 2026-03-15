@@ -5,12 +5,13 @@ const {PAGE_LIMIT,SGNDURL_LIMITDATE_MS}=require("../const_vars.js");
 
 const {GoalModel}=require("../../../db/mongodb");
 
-async function getGoals_fromDB(page,limitDate_order){
+// Fetches goals from DB with filter and dynamic sort field
+async function getGoals_fromDB(page, filter, orderField, order){
     
     try {
-        return await GoalModel.find()
-            .select('descr limit_date s3_imgName_latest expired')
-            .sort({limit_date: limitDate_order})
+        return await GoalModel.find(filter)
+            .select('descr expired limit_date s3_imgName_latest s3_imgName_original completed completed_date s3_imgName_completed')
+            .sort({ [orderField]: order })
             .skip((page-1)*PAGE_LIMIT)
             .limit(PAGE_LIMIT).lean();
     }
@@ -19,25 +20,30 @@ async function getGoals_fromDB(page,limitDate_order){
     }
 }
 
-async function getGoal_originalImage_fromDB(goal_id){
-    try {
-        return await GoalModel.findById(goal_id)
-            .select('s3_imgName_original')
-            .lean();
-    }
-    catch (error) {
-        throw error;
-    }
-}
 
-//Receives array of goals objects and returns the same array with the signed URL image
-//applied to each goal. Adds "imgUrl" and removes "s3_imgName".
-function applySignedUrls_4_goals(goals) {
+//Receives array of goals objects and returns the same array with signed URLs.
+//Always adds "img_latest" from s3_imgName_latest.
+//Always adds "img_original" from s3_imgName_original.
+//If completed === true, also adds "img_completed" from s3_imgName_completed.
+function add_imgsUrls(goals) {
     const modifiedGoals = [];
     for (let i = 0; i < goals.length; i++) {
-        const goal = goals[i]//.toObject(); // Convert Mongoose document to plain JavaScript object
-        goal["img_url"] = CLOUDFRONT.get_SignedUrl(goal.s3_imgName_latest, new Date(Date.now() + SGNDURL_LIMITDATE_MS));
+        const goal = goals[i];
+        
+        // Always sign the url from s3_imgName_latest and add as img_latest
+        goal["img_latest"] = getSignedUrl(goal.s3_imgName_latest);
         delete goal["s3_imgName_latest"];
+        
+        // Always sign the url from s3_imgName_original and add as img_original
+        goal["img_original"] = getSignedUrl(goal.s3_imgName_original);
+        delete goal["s3_imgName_original"];
+        
+        // If completed, also sign s3_imgName_completed and add as img_completed
+        if (goal.completed === true) {
+            goal["img_completed"] = getSignedUrl(goal.s3_imgName_completed);
+        }
+        delete goal["s3_imgName_completed"];
+        
         modifiedGoals.push(goal);
     }
     
@@ -50,4 +56,4 @@ function getSignedUrl(s3_imgName){
 
 }
 
-module.exports={getGoals_fromDB,getGoal_originalImage_fromDB,applySignedUrls_4_goals,getSignedUrl};
+module.exports={getGoals_fromDB,add_imgsUrls,getSignedUrl};

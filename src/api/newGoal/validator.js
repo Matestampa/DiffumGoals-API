@@ -21,7 +21,6 @@ const addDays = (days) => {
 };
 
 const newGoal_ValSchema=Joi.object({
-    user_id: Joi.string().alphanum().length(24).required(), // ObjectId if MongoDB
     descr: Joi.string().min(5).max(255).required(), // Descripción
     limit_date: Joi.date().
                 min(addDays(MIN_LIMITDATE_DAYS)).

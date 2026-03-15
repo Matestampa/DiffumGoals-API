@@ -10,11 +10,18 @@ const APP_CONN_VARS={
     port:process.env.PORT,
 }
 
+const AUTH_VARS={
+    JWT_COOKIE_NAME:"token",
+    JWT_COOKIE_SECURE: process.env.JWT_COOKIE_SECURE,
+    JWT_SECRET:process.env.JWT_SECRET,
+    JWT_EXPIRATION_MS:process.env.JWT_EXPIRATION_MS
+}
 
 //Goals Logic vars
 
 const GOALS_LOGIC_VARS={
-    limit:process.env.GOALS_LIMIT
+    user_limit:process.env.GOALS_USER_LIMIT,
+    global_limit:process.env.GOALS_GLOBAL_LIMIT
 }
 
-module.exports= {APP_CONN_VARS, GOALS_LOGIC_VARS};
+module.exports= {APP_CONN_VARS, AUTH_VARS, GOALS_LOGIC_VARS};

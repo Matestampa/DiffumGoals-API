@@ -1,0 +1,27 @@
+const {DEFLT_API_ERRORS}=require("../../../error_handling");
+const {internalError_handler,GEN_INT_ERRORS}=require("../../../error_handling");
+
+//-------- MONGODB/MONGOOSE ERRORS ------------------
+const {Error}=require("mongoose");
+const {MongoDB_Error}=require("../../../db/mongodb");
+
+//-------- AWS ERRORS ---------------------
+const {AWS_GEN_ERRORS}=require("../../../aws_services");
+
+
+async function completeGoal_errorHandler(error){
+
+    if (error instanceof AWS_GEN_ERRORS.AwsService_Error){ //error from AWS
+        internalError_handler(error);
+    }
+    else if (error instanceof Error){ //error from Mongoose
+        internalError_handler(new MongoDB_Error(error));
+    }
+    else{
+        internalError_handler(GEN_INT_ERRORS.UNKNOWN()); //unknow error
+    }
+    
+    return DEFLT_API_ERRORS.SERVER(); //always return server error
+}
+
+module.exports = {completeGoal_errorHandler} 

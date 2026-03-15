@@ -10,6 +10,10 @@ async function countCurrentGoals(){
     return currentGoalsCount;
 }
 
+async function countCurrentGoalsByUser(user_id){
+    let currentGoalsCount=await GoalModel.countDocuments({user_id:user_id});
+    return currentGoalsCount;
+}
 
 //Determinar el color
 /// Devuelve un color RGB que se distinga mucho de los colores de la imagen
@@ -125,6 +129,7 @@ function generate_S3Images_names(randId){
 
 
 module.exports={countCurrentGoals,
+                countCurrentGoalsByUser,
                 get_diffumColor,
                 add_4thChannelToBuffer,
                 get_cant_pix_xday,
