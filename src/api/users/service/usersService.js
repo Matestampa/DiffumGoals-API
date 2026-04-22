@@ -1,4 +1,4 @@
-const {get_user,create_user,hash_password,compare_passwords,generate_JWT} = require("./utils.js");
+const {get_user,create_user,hash_password,compare_passwords,generate_JWT,get_user_by_provider_id,create_oauth_user} = require("./utils.js");
 
 const {DEFLT_API_ERRORS} = require("../../../error_handling");
 const {users_errorHandler} = require("./error_handler.js");
@@ -61,8 +61,48 @@ async function login_Service(username, password) {
     }
 }
 
+async function googleOAuth_Service(profile) {
+    try {
+        const provider_type = "google";
+        const provider_id = `${provider_type}_${profile.id}`;
+        const email = profile.emails?.[0]?.value ?? null;
+
+        let user = await get_user_by_provider_id(provider_id);
+
+        if (!user) {
+            const baseName = profile.displayName
+                ? profile.displayName.replace(/\s+/g, "_")
+                : (email ? email.split("@")[0] : `user_${profile.id}`);
+
+            let username = baseName;
+            let existing = await get_user(username);
+            if (existing) {
+                username = `${baseName}_${profile.id.slice(-6)}`;
+            }
+
+            user = await create_oauth_user(username, provider_type, provider_id, email);
+        }
+
+        return {
+            error: null,
+            data: {
+                user_id: user._id,
+                username: user.username,
+                token: generate_JWT(user._id, user.username)
+            }
+        };
+    }
+    catch (e) {
+        let user_error = await users_errorHandler(e);
+        return { error: user_error, data: null };
+    }
+}
+
 
 module.exports = {
     register_Service,
-    login_Service
+    login_Service,
+    googleOAuth_Service
 }
+
+

@@ -24,4 +24,11 @@ const GOALS_LOGIC_VARS={
     global_limit:process.env.GOALS_GLOBAL_LIMIT
 }
 
-module.exports= {APP_CONN_VARS, AUTH_VARS, GOALS_LOGIC_VARS};
+const GOOGLE_OAUTH_VARS={
+    CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+    FRONTEND_URL: process.env.FRONTEND_URL
+}
+
+module.exports= {APP_CONN_VARS, AUTH_VARS, GOALS_LOGIC_VARS, GOOGLE_OAUTH_VARS};
