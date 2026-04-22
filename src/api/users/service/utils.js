@@ -60,10 +60,28 @@ function generate_JWT(user_id, username) {
 
 
 
+async function create_oauth_user(username, provider_type, provider_id, email) {
+    const user = new UserModel({
+        username,
+        provider_type,
+        provider_id,
+        email
+    });
+
+    let userData = await user.save();
+    return userData;
+}
+
+async function get_user_by_provider_id(provider_id) {
+    return await UserModel.findOne({ provider_id });
+}
+
 module.exports = {
     get_user,
     create_user,
     hash_password,
     compare_passwords,
-    generate_JWT
+    generate_JWT,
+    get_user_by_provider_id,
+    create_oauth_user
 }

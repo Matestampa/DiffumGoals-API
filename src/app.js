@@ -7,6 +7,8 @@ const cookieParser = require("cookie-parser");
 
 //---------------------- IMPORT MIDLEWARES ---------------------
 
+const passport = require("./config/passport_config.js");
+
 
 //----------------------- IMPORT ROUTES ------------------------
 
@@ -29,6 +31,7 @@ App.use(cors(
 
 App.use(express.json());
 App.use(cookieParser());
+App.use(passport.initialize());
 
 
 
