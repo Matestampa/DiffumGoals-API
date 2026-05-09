@@ -6,10 +6,30 @@ const UsersController = require("../controllers/usersControllers.js");
 
 const {authentication} = require("../middlewares/auth.js");
 const {normal_response} = require("../middlewares/response.js");
+const passport = require("../config/passport_config.js");
+const {GOOGLE_OAUTH_VARS} = require("../config/app_config.js");
 
-router.post("/register", UsersController.register);
 
-router.post("/login", UsersController.login);
+// ---------- Google OAuth ----------
+
+router.get("/auth/google",
+    passport.authenticate("google", { scope: ["profile", "email"], session: false })
+);
+
+router.get("/auth/google/callback",
+    (req, res, next) => {
+        passport.authenticate("google", { session: false }, (err, userData) => {
+            if (err || !userData) {
+                return res.redirect(`${GOOGLE_OAUTH_VARS.FRONTEND_URL}?error=oauth_failed`);
+            }
+            req.oauth_user = userData;
+            next();
+        })(req, res, next);
+    },
+    UsersController.googleAuthCallback
+);
+
+
 
 router.post("/logout", authentication, UsersController.logout);
 
