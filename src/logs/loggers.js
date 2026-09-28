@@ -4,9 +4,14 @@ const {AWS_CLOUDWATCH_VARS} = require("../config/aws_config.js");
 const { createLogger, format, transports } = require("winston");
 const WinstonCloudWatch = require("winston-cloudwatch");
 
-// AWS CloudWatch configuration
+// AWS CloudWatch configuration.
+// awsAccessKeyId/awsSecretKey are only set locally (.env.dev); on EC2 (prod/testProd)
+// they're omitted so winston-cloudwatch falls back to the instance role.
 const awsCloudWatchConfig = {
-  ...AWS_CLOUDWATCH_VARS,
+  awsRegion: AWS_CLOUDWATCH_VARS.awsRegion,
+  ...(AWS_CLOUDWATCH_VARS.awsAccessKeyId && AWS_CLOUDWATCH_VARS.awsSecretKey
+      ? { awsAccessKeyId: AWS_CLOUDWATCH_VARS.awsAccessKeyId, awsSecretKey: AWS_CLOUDWATCH_VARS.awsSecretKey }
+      : {}),
   uploadRate : 5000,
   maxBatchCount: 100
 };
