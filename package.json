@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env APP_ENV=prod NODE_ENV=production node ./src/index.js",
-    "dev": "cross-env APP_ENV=dev nodemon ./src/index.js",
-    "testProd": "cross-env APP_ENV=testProd NODE_ENV=production node ./src/index.js",
-    "test": "cross-env APP_ENV=dev jest"
+    "local": "cross-env APP_ENV=local nodemon ./src/index.js",
+    "dev": "cross-env APP_ENV=dev NODE_ENV=production node ./src/index.js",
+    "test": "cross-env APP_ENV=local jest"
   },
   "author": "",
   "license": "ISC",

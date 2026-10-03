@@ -19,24 +19,32 @@ This repo is the **backend REST API** only (Node.js + Express).
 - Node.js + Express 4
 - MongoDB / Mongoose (schemas come from external npm package, not defined locally)
 - AWS S3 (image storage) + AWS CloudFront (signed URLs for private image access)
-- AWS CloudWatch (remote logging in non-dev envs) via `winston` + `winston-cloudwatch`
+- AWS CloudWatch (remote logging in non-local envs) via `winston` + `winston-cloudwatch`
 - Auth: Passport Google OAuth20 strategy + JWT (`jsonwebtoken`) stored in an httpOnly cookie
 - Validation: Joi
 - Image processing: `sharp` (validate dimensions/format, add alpha channel)
 - File uploads: `multer` (memory storage, single file field `img`)
 - Tests: Jest + Supertest (see `__tests__/`)
-- Env config: `dotenv`, loaded per `APP_ENV` (`.env.dev`, `.env.prod`, `.env.testProd`, see `.env.example`)
+- Env config: `dotenv`, loaded per `APP_ENV` (`.env.local`, `.env.dev`, `.env.prod`, see `.env.example`)
 
 ## Running / scripts (package.json)
 
-- `npm run dev` — `APP_ENV=dev nodemon ./src/index.js`
+- `npm run local` — `APP_ENV=local nodemon ./src/index.js` (local machine dev loop)
+- `npm run dev` — `APP_ENV=dev NODE_ENV=production node ./src/index.js` (shared `dev` server/branch)
 - `npm start` — `APP_ENV=prod NODE_ENV=production node ./src/index.js`
-- `npm run testProd` — runs with `APP_ENV=testProd NODE_ENV=production`
-- `npm test` — `APP_ENV=dev jest`
+- `npm test` — `APP_ENV=local jest`
 
 Env vars are loaded from `.env.{APP_ENV}` (see [src/config/get_env.js](src/config/get_env.js)).
 `.env.example` documents every required variable (Mongo URL, JWT secret, Google OAuth creds,
 S3/CloudFront/CloudWatch creds, goals limits, log paths/group names).
+
+### Branch ↔ env mapping
+
+| Git branch         | APP_ENV | npm script   |
+|---------------------|---------|--------------|
+| `master`            | `prod`  | `npm start`  |
+| `dev`               | `dev`   | `npm run dev`|
+| feature branches    | `local` | `npm run local` |
 
 ## Entry point / bootstrap flow
 
@@ -131,7 +139,7 @@ accidental/typo file, likely safe to delete (verify before removing).
 
 ## Config (`src/config/`)
 
-- `get_env.js` — determines `APP_ENV` (default `"dev"`), loads `.env.{APP_ENV}` via dotenv
+- `get_env.js` — determines `APP_ENV` (default `"local"`), loads `.env.{APP_ENV}` via dotenv
 - `app_config.js` — `APP_CONN_VARS` (host/port), `AUTH_VARS` (JWT cookie/secret/expiry),
   `GOALS_LOGIC_VARS` (per-user/global goal limits), `GOOGLE_OAUTH_VARS`
 - `aws_config.js` — S3, CloudFront, CloudWatch credentials/settings

@@ -1,6 +1,6 @@
-.env.dev
+.env.local
 .env.prod
-.env.testProd
+.env.dev
 
 /src/logs/files
 

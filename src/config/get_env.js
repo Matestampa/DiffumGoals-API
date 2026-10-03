@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 const { fileURLToPath } = require('url');
 const { join, dirname } = require("path");
 
-const APP_ENV=process.env.APP_ENV?process.env.APP_ENV:"dev";
+const APP_ENV=process.env.APP_ENV?process.env.APP_ENV:"local";
 
 //const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 //let __dirname=dirname(__filename);
