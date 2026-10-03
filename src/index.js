@@ -2,7 +2,7 @@ const { load_env } = require("./config/load_env.js");
 
 async function start(){
     // Must run before requiring anything that reads process.env at load time
-    // (dotenv for dev, AWS SSM Parameter Store for prod/testProd).
+    // (dotenv for local, AWS SSM Parameter Store for dev/prod).
     await load_env();
 
     const { App } = require("./app.js");

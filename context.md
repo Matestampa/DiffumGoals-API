@@ -25,7 +25,8 @@ This repo is the **backend REST API** only (Node.js + Express).
 - Image processing: `sharp` (validate dimensions/format, add alpha channel)
 - File uploads: `multer` (memory storage, single file field `img`)
 - Tests: Jest + Supertest (see `__tests__/`)
-- Env config: `dotenv`, loaded per `APP_ENV` (`.env.local`, `.env.dev`, `.env.prod`, see `.env.example`)
+- Env config: `APP_ENV=local` uses `dotenv` (`.env.local`, see `.env.example`); `APP_ENV=dev`/`prod`
+  fetch vars from AWS SSM Parameter Store instead (EC2 instance role, no `.env` file involved)
 
 ## Running / scripts (package.json)
 
@@ -34,9 +35,26 @@ This repo is the **backend REST API** only (Node.js + Express).
 - `npm start` — `APP_ENV=prod NODE_ENV=production node ./src/index.js`
 - `npm test` — `APP_ENV=local jest`
 
-Env vars are loaded from `.env.{APP_ENV}` (see [src/config/get_env.js](src/config/get_env.js)).
-`.env.example` documents every required variable (Mongo URL, JWT secret, Google OAuth creds,
-S3/CloudFront/CloudWatch creds, goals limits, log paths/group names).
+Env var loading is split across [src/config/get_env.js](src/config/get_env.js) and
+[src/config/load_env.js](src/config/load_env.js):
+- `APP_ENV=local` — `get_env.js` synchronously loads `.env.local` via `dotenv` at require-time
+  (so it works for tests too, which `require` the app directly).
+- `APP_ENV=dev`/`prod` — `src/index.js` awaits `load_env()` **before** requiring `app.js` or any
+  config module. `load_env()` fetches every parameter under `/diffumGoals/api/{dev|prod}/` from
+  AWS SSM Parameter Store (`GetParametersByPathCommand`, paginated) and copies each one into
+  `process.env` using the parameter's last path segment as the var name. No `.env` file is used
+  or needed for these environments — the app must run on an EC2 instance with a role that can
+  read that SSM path, read/write the S3 bucket, and write to CloudWatch.
+- AWS SDK clients (`S3Client` in [src/aws_services/s3.js](src/aws_services/s3.js), and
+  `winston-cloudwatch` in [src/logs/loggers.js](src/logs/loggers.js)) only pass explicit
+  `accessKeyId`/`secretAccessKey` when those vars are present (i.e. `local`, from `.env.local`);
+  otherwise credentials are omitted so the AWS SDK's default credential chain picks up the EC2
+  instance role. The `SSMClient` itself also relies on the instance role, but still needs an
+  explicit `AWS_REGION` — that one env var must be set directly in the EC2 process environment
+  (launch template/systemd), since it can't be fetched from SSM before you know the region.
+- `.env.example` documents every variable used in `local` (Mongo URL, JWT secret, Google OAuth
+  creds, S3/CloudFront/CloudWatch creds, goals limits, log paths/group names); the same variable
+  names (minus the local-only AWS access keys) must exist as SSM parameters for `dev`/`prod`.
 
 ### Branch ↔ env mapping
 
@@ -139,7 +157,8 @@ accidental/typo file, likely safe to delete (verify before removing).
 
 ## Config (`src/config/`)
 
-- `get_env.js` — determines `APP_ENV` (default `"local"`), loads `.env.{APP_ENV}` via dotenv
+- `get_env.js` — determines `APP_ENV` (default `"local"`); for `"local"` also loads `.env.local` via dotenv
+- `load_env.js` — for `"dev"`/`"prod"`, async-loads vars from AWS SSM Parameter Store (awaited in `src/index.js` before anything else is required)
 - `app_config.js` — `APP_CONN_VARS` (host/port), `AUTH_VARS` (JWT cookie/secret/expiry),
   `GOALS_LOGIC_VARS` (per-user/global goal limits), `GOOGLE_OAUTH_VARS`
 - `aws_config.js` — S3, CloudFront, CloudWatch credentials/settings

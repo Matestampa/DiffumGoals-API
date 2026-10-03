@@ -5,7 +5,7 @@ const { aws_errorHandler } = require("./error_handler.js");
 
 //----------------------- S3 class client & vars---------------------------
 
-// Access keys are only set locally (.env.dev). On EC2 (prod/testProd) they're
+// Access keys are only set locally (.env.local). On EC2 (dev/prod) they're
 // omitted so the SDK falls back to the instance role via its default credential chain.
 const S3=new S3Client({
     region:AWS_S3_VARS.bucketRegion,
