@@ -55,6 +55,16 @@ Env var loading is split across [src/config/get_env.js](src/config/get_env.js) a
 - `.env.example` documents every variable used in `local` (Mongo URL, JWT secret, Google OAuth
   creds, S3/CloudFront/CloudWatch creds, goals limits, log paths/group names); the same variable
   names (minus the local-only AWS access keys) must exist as SSM parameters for `dev`/`prod`.
+- [src/config/required_env_vars.js](src/config/required_env_vars.js) is the single source of
+  truth listing every hardcoded `process.env.X` key the app reads, split into `REQUIRED_COMMON`
+  (all envs), `REQUIRED_LOCAL_ONLY` (`.env.local` log file paths + local-only AWS access keys),
+  and `REQUIRED_REMOTE_ONLY` (`AWS_REGION` + CloudWatch log group names for `dev`/`prod`). Update
+  this file whenever a feature starts reading a new env var.
+  [src/config/validate_env.js](src/config/validate_env.js) exports `validate_env(APP_ENV)`, which
+  diffs that list against `process.env` and, on any missing key, logs the missing var name(s) and
+  calls `process.exit(1)`. It's called right after whatever populated `process.env` for that
+  environment — inside `get_env.js` after `dotenv.config()` (`local`), and inside `load_env.js`
+  after `load_from_ssm()` (`dev`/`prod`) — so a missing var always fails fast before the server starts.
 
 ### Branch ↔ env mapping
 
