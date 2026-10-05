@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 const { join } = require("path");
+const { validate_env } = require("./validate_env.js");
 
 const APP_ENV=process.env.APP_ENV?process.env.APP_ENV:"local";
 
@@ -9,6 +10,7 @@ const APP_ENV=process.env.APP_ENV?process.env.APP_ENV:"local";
 // asynchronously by ./load_env.js BEFORE any config module is required (see src/index.js).
 if (APP_ENV === "local"){
     dotenv.config({ path: join(__dirname, "../../.env.local") });
+    validate_env(APP_ENV);
 }
 
 function get_env(){
