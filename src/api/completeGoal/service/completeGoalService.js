@@ -9,7 +9,7 @@ const {completeGoal_errorHandler}=require("./error_handler.js");
 const {DEFLT_API_ERRORS} = require("../../../error_handling");
 
 
-function validate_completeGoalOperation(goalData,userId){
+function validate_completeGoalOperation(goalData,userId){ 
     if (!goalData) {
             return { error: DEFLT_API_ERRORS.BAD_REQ("Goal not found")};
         }
@@ -65,5 +65,6 @@ async function completeGoal_Service(userId,goalId,imgBuffer){
 }
 
 module.exports={
-    completeGoal_Service
+    completeGoal_Service,
+    validate_completeGoalOperation
 }

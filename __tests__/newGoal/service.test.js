@@ -1,114 +1,138 @@
+const sharp = require('sharp');
+
 const { newGoal_Service } = require('../../src/api/newGoal/service/newGoalService.js');
-const { newGoal_errorHandler } = require('../../src/api/newGoal/service/error_handler.js');
+const { GOALS_LOGIC_VARS } = require('../../src/config/app_config.js');
+const { GoalModel } = require('../../src/db/mongodb');
 
-const { S3_FUNCS,AWS_GEN_ERRORS } = require('../../src/aws_services/index.js');
-const {DEFLT_API_ERRORS}=require("../../src/error_handling/index.js");
-//const { generateRand_MONGO_S3_ids } = require('../../src/services/newGoal/utils.js');
-const { GoalModel } = require('../../src/db/mongodb/index.js');
-const { MongoDB_Error } = require('../../src/db/mongodb/index.js');
+const {
+    connectTestDb, disconnectTestDb, clearGoals, newObjectId, buildGoal, seedGoals
+} = require('../test_utils.js');
 
+// Only S3 and CloudFront (real AWS/network calls) are mocked. AWS_GEN_ERRORS is kept real,
+// since the error handler relies on `instanceof` checks against it.
+jest.mock('../../src/aws_services', () => {
+    const actual = jest.requireActual('../../src/aws_services');
+    return {
+        ...actual,
+        S3_FUNCS: { saveObject: jest.fn() },
+        CLOUDFRONT: { get_SignedUrl: jest.fn() }
+    };
+});
 
-jest.mock('../../src/aws_services');
-jest.mock('../../src/db/mongodb');
-//jest.mock('../../src/services/newGoal/utils.js');
+// Only the logging side effect of the error handler is silenced, the DB and the error handler are real
+jest.mock('../../src/logs/loggers.js', () => ({
+    infoLogger: { info: jest.fn() },
+    errorLogger: { error: jest.fn() }
+}));
 
-/*jest.mock('../../../src/services/newGoal/error_handler.js',() => ({
-    newGoal_errorHandler: jest.fn().mockResolvedValue(DEFLT_API_ERRORS.SERVER()),
-}));*/
+const { S3_FUNCS, CLOUDFRONT } = require('../../src/aws_services');
+const { AWS_GEN_ERRORS } = jest.requireActual('../../src/aws_services');
 
-jest.mock('../../src/api/newGoal/service/error_handler.js');
+const USER_LIMIT = Number(GOALS_LOGIC_VARS.user_limit);
+const GLOBAL_LIMIT = Number(GOALS_LOGIC_VARS.global_limit);
 
+beforeAll(connectTestDb);
+afterAll(disconnectTestDb);
+beforeEach(clearGoals);
+
+beforeEach(() => {
+    jest.clearAllMocks();
+    S3_FUNCS.saveObject.mockResolvedValue(undefined);
+    CLOUDFRONT.get_SignedUrl.mockImplementation((key) => `https://signed.test/${key}`);
+});
+
+const buildImgBuffer = () => sharp({
+    create: { width: 100, height: 100, channels: 3, background: { r: 255, g: 255, b: 255 } }
+}).png().toBuffer();
 
 describe('newGoal_Service', () => {
-    let mockImgBuffer = Buffer.from('mock image data');
-    let mockUserId = 'user123';
-    let mockDescr = 'A sample goal description';
-    let mockLimitDate = new Date();
-    
-    beforeEach(() => {
-        jest.clearAllMocks();  // Clear mocks before each test
-    });
+    const userId = newObjectId();
+    const username = 'tester';
+    const descr = 'A sample goal description';
+    const limitDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    it('should successfully save goal to S3 and MongoDB', async () => {
-        // Mock generated IDs
-        /*generateRand_MONGO_S3_ids.mockReturnValue({
-            db_id: 'mockMongoId',
-            s3_id: 'mockS3Id'
-        });*/
+    it('saves the image to S3, the goal to MongoDB, and returns the goal_id and a signed img_url', async () => {
+        const imgBuffer = await buildImgBuffer();
 
-        // Mock saveObject (S3)
-        S3_FUNCS.saveObject.mockResolvedValueOnce(true);  // Simulate successful S3 upload
+        const result = await newGoal_Service(userId.toString(), username, descr, limitDate, imgBuffer);
 
-        // Mock GoalModel.save() (MongoDB)
-        GoalModel.prototype.save.mockResolvedValueOnce(true);  // Simulate successful MongoDB save
-
-        const result = await newGoal_Service(mockUserId, mockDescr, mockLimitDate, mockImgBuffer);
-        
-        // Expect no errors
         expect(result.error).toBeNull();
         expect(result.data).toHaveProperty('goal_id');
-        expect(result.data).toHaveProperty('img_url');
+        expect(result.data.img_url).toEqual(expect.stringContaining('https://signed.test/'));
 
-        // Verify S3 and MongoDB were called
-        expect(S3_FUNCS.saveObject).toHaveBeenCalled();
-        expect(GoalModel.prototype.save).toHaveBeenCalled();
+        // S3: once for the "original" image, once for the "latest" image
+        expect(S3_FUNCS.saveObject).toHaveBeenCalledTimes(2);
+        const [originalCall, latestCall] = S3_FUNCS.saveObject.mock.calls;
+        expect(originalCall[0]).toEqual(expect.stringContaining('_original'));
+        expect(originalCall[2]).toBe('image/png');
+        expect(latestCall[2]).toBe('image/png');
+
+        // CloudFront was signed for the "latest" image name used in img_url
+        expect(CLOUDFRONT.get_SignedUrl).toHaveBeenCalledWith(latestCall[0], expect.any(Date));
+
+        // The goal was actually persisted
+        const savedGoal = await GoalModel.findById(result.data.goal_id).lean();
+        expect(savedGoal).not.toBeNull();
+        expect(savedGoal).toMatchObject({
+            user_id: userId,
+            username,
+            descr,
+            completed: false,
+            s3_imgName_original: originalCall[0],
+            s3_imgName_latest: latestCall[0]
+        });
+        expect(savedGoal.limit_date.toISOString()).toBe(limitDate.toISOString());
+        expect(Number.isInteger(savedGoal.cant_pix_xday)).toBe(true);
+        expect(savedGoal.cant_pix_xday).toBeGreaterThan(0);
     });
 
-    //hacer los tests que faltan
-    it('should handle S3 error and return user-friendly error', async () => {
-        // Mock generated IDs
-        /*generateRand_MONGO_S3_ids.mockReturnValue({
-            mongo_id: 'mockMongoId',
-            s3_id: 'mockS3Id'
-        });*/
+    it(`fails with BAD_REQ when the user already has ${USER_LIMIT} goals, without calling S3`, async () => {
+        const existingGoals = Array.from({ length: USER_LIMIT }, () => buildGoal({ user_id: userId }));
+        await seedGoals(existingGoals);
 
-        // Simulate S3 error
-        const mockS3Error = new AWS_GEN_ERRORS.AwsService_Error();
-        S3_FUNCS.saveObject.mockRejectedValueOnce(mockS3Error);
+        const imgBuffer = await buildImgBuffer();
+        const result = await newGoal_Service(userId.toString(), username, descr, limitDate, imgBuffer);
 
-        // Mock error handler
-        const mockErrorResponse = DEFLT_API_ERRORS.SERVER();
-        newGoal_errorHandler.mockResolvedValueOnce(mockErrorResponse);
-
-        const result = await newGoal_Service(mockUserId, mockDescr, mockLimitDate, mockImgBuffer);
-
-        // Verify error was handled
-        expect(newGoal_errorHandler).toHaveBeenCalled()
-        expect(result.error).toEqual(mockErrorResponse);
         expect(result.data).toBeNull();
-
-        // Ensure MongoDB wasn't called after S3 failure
-        expect(GoalModel.prototype.save).not.toHaveBeenCalled();
+        expect(result.error).toMatchObject({ code: 'BAD_REQ', message: "User's Goals Limit Reached" });
+        expect(S3_FUNCS.saveObject).not.toHaveBeenCalled();
     });
 
-    it('should handle MongoDB error and return user-friendly error', async () => {
-        // Mock generated IDs
-        /*generateRand_MONGO_S3_ids.mockReturnValue({
-            mongo_id: 'mockMongoId',
-            s3_id: 'mockS3Id'
-        });*/
+    it(`fails with BAD_REQ when the global goal count has reached ${GLOBAL_LIMIT}, without calling S3`, async () => {
+        // Spread across distinct users so the per-user limit isn't hit first
+        const existingGoals = Array.from({ length: GLOBAL_LIMIT }, () => buildGoal());
+        await seedGoals(existingGoals);
 
-        // Mock S3 upload success
-        S3_FUNCS.saveObject.mockResolvedValueOnce(true);
+        const imgBuffer = await buildImgBuffer();
+        const result = await newGoal_Service(userId.toString(), username, descr, limitDate, imgBuffer);
 
-        // Simulate MongoDB error
-        const mockMongoError = new MongoDB_Error('MongoDB failed');
-        GoalModel.prototype.save.mockRejectedValueOnce(mockMongoError);
-
-        // Mock error handler
-        const mockErrorResponse = DEFLT_API_ERRORS.SERVER();
-        newGoal_errorHandler.mockResolvedValueOnce(mockErrorResponse);
-
-        const result = await newGoal_Service(mockUserId, mockDescr, mockLimitDate, mockImgBuffer);
-
-        // Verify error was handled
-        expect(newGoal_errorHandler).toHaveBeenCalled()
-        expect(result.error).toEqual(mockErrorResponse);
         expect(result.data).toBeNull();
+        expect(result.error).toMatchObject({ code: 'BAD_REQ', message: 'Goals Limit Reached' });
+        expect(S3_FUNCS.saveObject).not.toHaveBeenCalled();
+    }, 20000);
 
-        // Verify S3 was called before MongoDB failure
-        expect(S3_FUNCS.saveObject).toHaveBeenCalled();
+    it('handles an S3 failure, returns a server error and does not persist the goal', async () => {
+        S3_FUNCS.saveObject.mockRejectedValueOnce(new AWS_GEN_ERRORS.AwsService_Unknown_Error('', new Error('boom'), 'S3'));
+
+        const imgBuffer = await buildImgBuffer();
+        const result = await newGoal_Service(userId.toString(), username, descr, limitDate, imgBuffer);
+
+        expect(result.data).toBeNull();
+        expect(result.error).toMatchObject({ code: 'SERVER' });
+        expect(await GoalModel.countDocuments()).toBe(0);
     });
 
+    it('handles a MongoDB validation error, returns a server error, after S3 was already called', async () => {
 
-})
+        const imgBuffer = await buildImgBuffer();
+
+        // user_id stays valid (so the goal-limit checks pass and S3 gets called); omitting the
+        // required `username` field instead forces a real Mongoose ValidationError on save.
+        const result = await newGoal_Service(userId.toString(), undefined, descr, limitDate, imgBuffer);
+
+        expect(result.data).toBeNull();
+        expect(result.error).toMatchObject({ code: 'SERVER' });
+        expect(S3_FUNCS.saveObject).toHaveBeenCalledTimes(2);
+        expect(await GoalModel.countDocuments()).toBe(0);
+    });
+});

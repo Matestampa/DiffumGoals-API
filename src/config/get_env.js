@@ -4,12 +4,12 @@ const { validate_env } = require("./validate_env.js");
 
 const APP_ENV=process.env.APP_ENV?process.env.APP_ENV:"local";
 
-// Only "local" loads vars synchronously from a .env file here, since it's
-// safe/instant and every config module (and tests) can rely on it at require-time.
+// "local" and "test" load vars synchronously from a .env file here (.env.local / .env.test),
+// since it's safe/instant and every config module (and tests) can rely on it at require-time.
 // "dev"/"prod" get their vars from AWS SSM Parameter Store instead, loaded
 // asynchronously by ./load_env.js BEFORE any config module is required (see src/index.js).
-if (APP_ENV === "local"){
-    dotenv.config({ path: join(__dirname, "../../.env.local") });
+if (APP_ENV === "local" || APP_ENV === "test"){
+    dotenv.config({ path: join(__dirname, `../../.env.${APP_ENV}`) });
     validate_env(APP_ENV);
 }
 

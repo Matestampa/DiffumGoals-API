@@ -6,7 +6,7 @@ const SSM_PATH_PREFIX = env => `/diffumGoals/api/${env}/`;
 
 /**
  * Populates process.env for non-local environments.
- * "local" is already handled (loaded + validated) synchronously by ./get_env.js (dotenv, .env.local).
+ * "local" and "test" are already handled (loaded + validated) synchronously by ./get_env.js (dotenv, .env.local / .env.test).
  * "dev"/"prod" pull parameters from AWS SSM Parameter Store, using the
  * EC2 instance role for credentials (no access keys needed).
  * MUST be awaited before requiring any module that reads process.env at load time.
@@ -14,7 +14,7 @@ const SSM_PATH_PREFIX = env => `/diffumGoals/api/${env}/`;
 async function load_env(){
     const APP_ENV = get_env();
 
-    if (APP_ENV === "local") return;
+    if (APP_ENV === "local" || APP_ENV === "test") return;
 
     await load_from_ssm(APP_ENV);
     validate_env(APP_ENV);

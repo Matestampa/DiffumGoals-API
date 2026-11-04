@@ -40,7 +40,26 @@ const REQUIRED_REMOTE_ONLY = [
     "ERROR_LOG_GROUP_NAME"
 ];
 
+// Only required for APP_ENV=test (.env.test); AWS/logging services are mocked in tests
+const REQUIRED_TEST = [
+    "JWT_COOKIE_SECURE",
+    "JWT_SECRET",
+    "JWT_EXPIRATION_MS",
+    "GOALS_USER_LIMIT",
+    "GOALS_GLOBAL_LIMIT",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+    "FRONTEND_URL",
+    "CLOUDFRONT_URL",
+    "CLOUDFRONT_KEY_PAIR_ID",
+    "CLOUDFRONT_PRIVATE_KEY",
+    "MONGODB_URL"
+];
+
 function get_required_env_vars(APP_ENV){
+    if (APP_ENV === "test") return REQUIRED_TEST;
+
     return APP_ENV === "local"
         ? [...REQUIRED_COMMON, ...REQUIRED_LOCAL_ONLY]
         : [...REQUIRED_COMMON, ...REQUIRED_REMOTE_ONLY];

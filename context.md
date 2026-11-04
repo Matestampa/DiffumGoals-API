@@ -25,7 +25,7 @@ This repo is the **backend REST API** only (Node.js + Express).
 - Image processing: `sharp` (validate dimensions/format, add alpha channel)
 - File uploads: `multer` (memory storage, single file field `img`)
 - Tests: Jest + Supertest (see `__tests__/`)
-- Env config: `APP_ENV=local` uses `dotenv` (`.env.local`, see `.env.example`); `APP_ENV=dev`/`prod`
+- Env config: `APP_ENV=local`/`test` use `dotenv` (`.env.local` / `.env.test`, see `.env.example`); `APP_ENV=dev`/`prod`
   fetch vars from AWS SSM Parameter Store instead (EC2 instance role, no `.env` file involved)
 
 ## Running / scripts (package.json)
@@ -33,12 +33,14 @@ This repo is the **backend REST API** only (Node.js + Express).
 - `npm run local` — `APP_ENV=local nodemon ./src/index.js` (local machine dev loop)
 - `npm run dev` — `APP_ENV=dev NODE_ENV=production node ./src/index.js` (shared `dev` server/branch)
 - `npm start` — `APP_ENV=prod NODE_ENV=production node ./src/index.js`
-- `npm test` — `APP_ENV=local jest`
+- `npm test` / `npm run test` — `cross-env APP_ENV=test jest`
 
 Env var loading is split across [src/config/get_env.js](src/config/get_env.js) and
 [src/config/load_env.js](src/config/load_env.js):
-- `APP_ENV=local` — `get_env.js` synchronously loads `.env.local` via `dotenv` at require-time
-  (so it works for tests too, which `require` the app directly).
+- `APP_ENV=local` — `get_env.js` synchronously loads `.env.local` via `dotenv` at require-time.
+- `APP_ENV=test` — same mechanism, but loads `.env.test` (git-ignored) and validates only the reduced
+  `REQUIRED_TEST` list (see below). Used by `npm test`, since tests `require` the app directly.
+  `load_env()` returns early for both `local` and `test` (no SSM).
 - `APP_ENV=dev`/`prod` — `src/index.js` awaits `load_env()` **before** requiring `app.js` or any
   config module. `load_env()` fetches every parameter under `/diffumGoals/api/{dev|prod}/` from
   AWS SSM Parameter Store (`GetParametersByPathCommand`, paginated) and copies each one into
@@ -58,12 +60,16 @@ Env var loading is split across [src/config/get_env.js](src/config/get_env.js) a
 - [src/config/required_env_vars.js](src/config/required_env_vars.js) is the single source of
   truth listing every hardcoded `process.env.X` key the app reads, split into `REQUIRED_COMMON`
   (all envs), `REQUIRED_LOCAL_ONLY` (`.env.local` log file paths + local-only AWS access keys),
-  and `REQUIRED_REMOTE_ONLY` (`AWS_REGION` + CloudWatch log group names for `dev`/`prod`). Update
-  this file whenever a feature starts reading a new env var.
+  and `REQUIRED_REMOTE_ONLY` (`AWS_REGION` + CloudWatch log group names for `dev`/`prod`).
+  `APP_ENV=test` uses its own `REQUIRED_TEST` list instead of those: `JWT_COOKIE_SECURE`, `JWT_SECRET`,
+  `JWT_EXPIRATION_MS`, `GOALS_USER_LIMIT`, `GOALS_GLOBAL_LIMIT`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+  `GOOGLE_CALLBACK_URL`, `FRONTEND_URL`, `CLOUDFRONT_URL`, `CLOUDFRONT_KEY_PAIR_ID`, `CLOUDFRONT_PRIVATE_KEY`,
+  `MONGODB_URL` (no host/port, S3, CloudWatch or log vars — AWS services and loggers are mocked in tests).
+  Update this file whenever a feature starts reading a new env var.
   [src/config/validate_env.js](src/config/validate_env.js) exports `validate_env(APP_ENV)`, which
   diffs that list against `process.env` and, on any missing key, logs the missing var name(s) and
   calls `process.exit(1)`. It's called right after whatever populated `process.env` for that
-  environment — inside `get_env.js` after `dotenv.config()` (`local`), and inside `load_env.js`
+  environment — inside `get_env.js` after `dotenv.config()` (`local`/`test`), and inside `load_env.js`
   after `load_from_ssm()` (`dev`/`prod`) — so a missing var always fails fast before the server starts.
 
 ### Branch ↔ env mapping
@@ -73,6 +79,7 @@ Env var loading is split across [src/config/get_env.js](src/config/get_env.js) a
 | `master`            | `prod`  | `npm start`  |
 | `dev`               | `dev`   | `npm run dev`|
 | feature branches    | `local` | `npm run local` |
+| (running tests)     | `test`  | `npm test`   |
 
 ## Entry point / bootstrap flow
 
@@ -167,8 +174,8 @@ accidental/typo file, likely safe to delete (verify before removing).
 
 ## Config (`src/config/`)
 
-- `get_env.js` — determines `APP_ENV` (default `"local"`); for `"local"` also loads `.env.local` via dotenv
-- `load_env.js` — for `"dev"`/`"prod"`, async-loads vars from AWS SSM Parameter Store (awaited in `src/index.js` before anything else is required)
+- `get_env.js` — determines `APP_ENV` (default `"local"`); for `"local"`/`"test"` also loads `.env.local` / `.env.test` via dotenv and validates
+- `load_env.js` — for `"dev"`/`"prod"` (no-op for `local`/`test`), async-loads vars from AWS SSM Parameter Store (awaited in `src/index.js` before anything else is required)
 - `app_config.js` — `APP_CONN_VARS` (host/port), `AUTH_VARS` (JWT cookie/secret/expiry),
   `GOALS_LOGIC_VARS` (per-user/global goal limits), `GOOGLE_OAUTH_VARS`
 - `aws_config.js` — S3, CloudFront, CloudWatch credentials/settings
@@ -184,9 +191,69 @@ file sample at `src/logs/files/error.json`.
 
 ## Tests (`__tests__/`)
 
-Mirrors `src/api/` feature folders (`getGoals/`, `newGoal/`), each with `integration.test.js`,
-`service.test.js`, `validator.test.js`. Run with `npm test` (Jest, `testEnvironment: node`).
-No tests yet for `completeGoal` or `users` — worth adding if extending those features.
+Run with `npm test` (`cross-env APP_ENV=test jest`, `testEnvironment: node`). Env vars come from `.env.test`
+(git-ignored; only the `REQUIRED_TEST` vars are validated). Needs a reachable MongoDB at
+`MONGODB_URL` (from `.env.test`) for the service/integration tests that hit the DB.
+
+### Layout and format
+
+`__tests__/` mirrors the `src/api/` feature folders. Every feature has one test file per layer:
+
+| File                  | What it tests                                                                    | DB | What is mocked |
+|------------------------|-----------------------------------------------------------------------------------|----|----------------|
+| `validator.test.js`    | The Joi validator function only (pure unit test)                                  | no | nothing |
+| `service.test.js`      | The service function, calling it directly (`{error, data}` results + DB state)    | yes | AWS (S3/CloudFront) and the logger |
+| `integration.test.js`  | The HTTP endpoint through the real Express `App` with Supertest (route → middleware → controller → validator → service) | yes* | AWS and the logger |
+
+\* The `users` integration test is the exception: it mocks the service and needs no DB (see below).
+
+Features covered: `newGoal`, `completeGoal`, `getGoals` (all three layers each) and `users`
+(only `service` + `integration`, because there is no validator; see below).
+
+### Shared helpers: [__tests__/test_utils.js](__tests__/test_utils.js)
+
+Not a test suite: `package.json` → `jest.testPathIgnorePatterns` excludes it from test discovery. Import it from
+feature tests with `require('../test_utils.js')`.
+
+- `connectTestDb` / `disconnectTestDb` — every Jest worker uses its own DB (`diffum_test_<JEST_WORKER_ID>`),
+  dropped at the end, so parallel test files never collide and the DB in `MONGODB_URL` is never touched.
+  Use as `beforeAll(connectTestDb)` / `afterAll(disconnectTestDb)`.
+- `clearGoals` / `clearUsers` — `beforeEach` cleanup.
+- `buildAuthCookie(user_id, username)` — `Cookie` header with a valid signed JWT, to call authenticated endpoints.
+- `buildGoal` / `buildCompletedGoal` / `buildExpiredGoal` / `seedGoals` / `seedDiffumingGoals` — goal fixtures.
+
+### Mocking conventions
+
+- The logger module (`src/logs/loggers.js`) is always mocked, so tests don't write logs/CloudWatch.
+- Only the external AWS boundary is mocked, by overriding `S3_FUNCS` / `CLOUDFRONT` inside
+  `jest.mock('../../src/aws_services', ...)`. The rest of that module (`AWS_GEN_ERRORS`) is kept real with
+  `jest.requireActual`, because the error handlers use `instanceof` checks against it.
+- The DB, validators, services and error handlers are real (so error paths are checked end-to-end: internal
+  errors must come back as a generic `SERVER` error with no details leaked).
+- Image fixtures are generated with `sharp` (100x100 PNG buffers), no files on disk.
+
+### Notes per feature
+
+- **newGoal / completeGoal**: S3 saving is mocked, the tests assert on what was saved and on the goal state in the DB
+  (user/global goal limits, ownership, already completed/expired goals, image validation).
+- **getGoals**: covers `goalStatus` filter, ordering, pagination (`nextPage`) and invalid query params for both
+  `/goals/all` (public) and `/goals/myGoals` (auth). Response shape checks that internal fields (`user_id`,
+  `s3_imgName_*`) aren't exposed.
+- **users** (Google OAuth only; the legacy username/password `register_Service`/`login_Service` are intentionally
+  NOT tested, they will be removed):
+  - No `validator.test.js`, since this feature has no validator.
+  - `service.test.js` covers only `googleOAuth_Service` against the real test DB: user creation, username generation
+    and collision suffix, JWT claims/expiry, re-login without duplicates, and DB failures → `SERVER` error.
+  - `integration.test.js` mocks `usersService.js` and replaces only the *callback step* of `passport-google-oauth20`
+    (a subclass of the real `Strategy` that fakes Google returning a profile or denying access). So the real routes,
+    passport verify function (`passport_config.js`) and controller run, while no Google/network/DB is involved. The
+    first step (`/users/auth/google`) is the real strategy: it only builds the Google redirect URL, which the test
+    checks (client_id, redirect_uri, scopes). It asserts redirections (`FRONTEND_URL` vs `?error=oauth_failed`), the
+    cookie flags, and that the service receives the Google profile. It also covers `POST /users/logout` and the
+    `authentication` middleware (exercised through `GET /users/isLoggedIn`: missing/invalid/expired/forged/`alg:none` tokens).
+  - The real Google consent screen can't be automated, so a full login with Google is only checked manually / in an
+    E2E run against a deployed environment (cross-site cookie behaviour between frontend and API also belongs there).
+  - The cookie `Secure` flag is intentionally not asserted: `JWT_COOKIE_SECURE` is a string (`"false"` is truthy).
 
 ## Known gaps / things a future agent may need to address
 
